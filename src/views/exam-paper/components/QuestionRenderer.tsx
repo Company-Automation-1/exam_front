@@ -41,9 +41,19 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       />
     );
   } else if (type === 'blank') {
-    body = <QuestionFillBlank value={typeof value === 'string' ? value : ''} onChange={onChange} />;
+    body = (
+      <QuestionFillBlank
+        value={typeof value === 'string' ? value : ''}
+        onChange={onChange}
+      />
+    );
   } else if (type === 'text') {
-    body = <QuestionTextAnswer value={typeof value === 'string' ? value : ''} onChange={onChange} />;
+    body = (
+      <QuestionTextAnswer
+        value={typeof value === 'string' ? value : ''}
+        onChange={onChange}
+      />
+    );
   }
 
   const typeTextMap: Record<string, string> = {

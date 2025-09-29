@@ -1,7 +1,9 @@
+import React from 'react';
 import { authApi } from '@/services/api';
 import type { LoginRequest } from '@/services/types/auth';
+import { message, Form, Input, Button } from 'antd';
 
-const LoginPage = () => {
+const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (values: LoginRequest) => {

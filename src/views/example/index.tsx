@@ -1,7 +1,9 @@
+import React from 'react';
 import { userApi } from '@/services/api';
 import type { User } from '@/services/types/user';
+import { message, Space, Button, Table } from 'antd';
 
-const Example = () => {
+const Example: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
