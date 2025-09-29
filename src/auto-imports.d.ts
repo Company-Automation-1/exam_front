@@ -6,22 +6,16 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const Button: typeof import('antd')['Button']
-  const Form: typeof import('antd')['Form']
-  const Input: typeof import('antd')['Input']
   const Link: typeof import('react-router-dom')['Link']
   const NavLink: typeof import('react-router-dom')['NavLink']
   const Navigate: typeof import('react-router-dom')['Navigate']
   const Outlet: typeof import('react-router-dom')['Outlet']
   const Route: typeof import('react-router-dom')['Route']
   const Routes: typeof import('react-router-dom')['Routes']
-  const Space: typeof import('antd')['Space']
-  const Table: typeof import('antd')['Table']
   const createRef: typeof import('react')['createRef']
   const forwardRef: typeof import('react')['forwardRef']
   const lazy: typeof import('react')['lazy']
   const memo: typeof import('react')['memo']
-  const message: typeof import('antd')['message']
   const startTransition: typeof import('react')['startTransition']
   const useCallback: typeof import('react')['useCallback']
   const useContext: typeof import('react')['useContext']
