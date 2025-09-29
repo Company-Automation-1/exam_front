@@ -1,0 +1,211 @@
+---
+description: 项目HTTP请求封装使用规范
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# HTTP 请求封装使用规范
+
+## 项目请求服务
+
+### 基础请求实例
+```tsx
+import request from '@/services/request';
+
+// 基础请求（无认证）
+const data = await request.get('/api/users');
+const result = await request.post('/api/users', { name: 'John' });
+```
+
+### 带认证的请求实例
+```tsx
+import { Request } from '@/services/request';
+
+const authRequest = new Request({
+  baseURL: '/api',
+  timeout: 10000,
+}, {
+  getAccessToken: () => localStorage.getItem('accessToken'),
+  getRefreshToken: () => localStorage.getItem('refreshToken'),
+  setTokens: (tokens) => {
+    localStorage.setItem('accessToken', tokens.accessToken);
+    if (tokens.refreshToken) {
+      localStorage.setItem('refreshToken', tokens.refreshToken);
+    }
+  },
+  refreshToken: async (refreshToken) => {
+    const response = await request.post('/auth/refresh', { refreshToken });
+    return {
+      accessToken: response.data.accessToken,
+      refreshToken: response.data.refreshToken,
+    };
+  },
+});
+```
+
+## 项目响应类型
+
+### 统一响应格式
+```tsx
+// 业务响应类型（支持默认泛型参数）
+type ApiResponse<T = unknown> = {
+  code: number;      // 业务状态码
+  message: string;   // 业务消息
+  result: T;         // 实际数据
+};
+
+// 错误类型
+type ApiError = {
+  status?: number;           // HTTP状态码
+  code?: string;            // 错误代码
+  message: string;          // 错误消息
+  details?: unknown;        // 错误详情（使用 unknown 更安全）
+  isNetworkError?: boolean; // 是否为网络错误
+  isTimeout?: boolean;      // 是否为超时错误
+  isCanceled?: boolean;     // 是否为取消错误
+};
+
+// 通用请求数据类型
+type RequestData = 
+  | Record<string, unknown>
+  | FormData
+  | string
+  | null
+  | undefined;
+```
+
+## 项目特定功能
+
+### 文件上传下载
+```tsx
+// 文件上传
+const uploadFile = async (file: File): Promise<{ url: string }> => {
+  const response = await request.upload<ApiResponse<{ url: string }>>(
+    '/api/upload',
+    { file }
+  );
+  return response.result;
+};
+
+// 文件下载
+const downloadFile = async (url: string, filename: string): Promise<void> => {
+  const blob = await request.download(url);
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+};
+```
+
+### 请求取消
+```tsx
+// 创建取消控制器
+const controller = request.createAbortController();
+
+// 使用取消信号
+const response = await request.get('/api/data', {
+  signal: controller.signal,
+});
+
+// 取消请求
+controller.abort();
+```
+
+## 错误处理
+
+### 统一错误处理
+```tsx
+const handleApiError = (error: ApiError) => {
+  if (error.isNetworkError) {
+    message.error('网络连接异常，请检查网络设置');
+  } else if (error.isTimeout) {
+    message.error('请求超时，请稍后重试');
+  } else if (error.status === 401) {
+    message.error('登录已过期，请重新登录');
+    navigate('/login');
+  } else if (error.status === 403) {
+    message.error('没有权限访问此资源');
+  } else if (error.status >= 500) {
+    message.error('服务器错误，请稍后重试');
+  } else {
+    message.error(error.message || '请求失败');
+  }
+};
+```
+
+## 项目最佳实践
+
+### 类型安全的使用方式
+```tsx
+// 1. 使用默认类型（推荐用于快速开发）
+const response = await request.get('/api/users');
+// response 是 ApiResponse<unknown> 类型，需要类型检查
+
+// 2. 指定具体类型（推荐用于生产环境）
+const response = await request.get<GetUsersResponse>('/api/users');
+// response 是 GetUsersResponse 类型，包含 { code, message, result }
+
+// 3. 类型安全的处理方式
+const response = await request.get<GetUsersResponse>('/api/users');
+if (response.code === 200) {
+  // response.result 是 UserListResponse 类型，可以直接使用
+  response.result.users.forEach(user => {
+    console.log(user.name); // 直接使用，有类型提示
+  });
+}
+```
+
+### API 服务组织
+```tsx
+// services/api/user.ts
+export const userApi = {
+  getUsers: (params?: { page?: number; pageSize?: number; keyword?: string }) => 
+    request.get<GetUsersResponse>('/api/users', { params }),
+  getUser: (id: number) => request.get<GetUserResponse>(`/api/users/${id}`),
+  createUser: (data: CreateUserRequest) => request.post<CreateUserResponse>('/api/users', data),
+  updateUser: (id: number, data: UpdateUserRequest) => 
+    request.put<UpdateUserResponse>(`/api/users/${id}`, data),
+  deleteUser: (id: number) => request.delete<DeleteUserResponse>(`/api/users/${id}`),
+};
+```
+
+### 自定义 Hook
+```tsx
+// hooks/useApi.ts
+const useApi = <T>(apiCall: () => Promise<T>) => {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  const execute = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await apiCall();
+      setData(result);
+      return result;
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError);
+      throw apiError;
+    } finally {
+      setLoading(false);
+    }
+  }, [apiCall]);
+
+  return { data, loading, error, execute };
+};
+
+// 使用示例
+const { data, loading, error, execute } = useApi(() => 
+  userApi.getUsers({ page: 1, pageSize: 10 })
+);
+```
+
+参考文件：
+- @src/services/request.ts

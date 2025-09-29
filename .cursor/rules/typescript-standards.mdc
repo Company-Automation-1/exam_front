@@ -1,0 +1,335 @@
+---
+description: TypeScript使用规范和最佳实践
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: true
+---
+
+# TypeScript 使用规范
+
+## 类型定义规范
+
+### 1. 基础类型使用
+- 优先使用 `interface` 定义对象类型
+- 使用 `type` 定义联合类型、函数类型等
+- 避免使用 `any`，使用 `unknown` 或具体类型
+
+```tsx
+// 推荐：使用 interface
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  isActive?: boolean;
+}
+
+// 推荐：使用 type 定义联合类型
+type Status = 'pending' | 'success' | 'error';
+
+// 推荐：使用 type 定义函数类型
+type EventHandler = (event: React.MouseEvent) => void;
+```
+
+### 2. 泛型使用
+- 合理使用泛型提高代码复用性
+- 为泛型参数提供有意义的名称
+- 使用泛型约束限制类型范围
+
+```tsx
+// 泛型接口
+interface ApiResponse<T> {
+  code: number;
+  message: string;
+  result: T;
+}
+
+// 泛型函数
+function createArray<T>(length: number, value: T): T[] {
+  return Array(length).fill(value);
+}
+
+// 泛型约束
+interface Lengthwise {
+  length: number;
+}
+
+function logLength<T extends Lengthwise>(arg: T): T {
+  console.log(arg.length);
+  return arg;
+}
+```
+
+### 3. 类型断言
+- 谨慎使用类型断言
+- 优先使用类型守卫
+- 使用 `as` 语法进行类型断言
+
+```tsx
+// 类型守卫
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+// 类型断言
+const element = document.getElementById('myId') as HTMLInputElement;
+```
+
+## React 类型定义
+
+### 1. 组件 Props 类型
+- 使用 `React.FC` 或直接定义函数类型
+- 为 children 提供正确的类型
+- 使用 `React.ReactNode` 处理复杂子元素
+
+```tsx
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary';
+}
+
+const Button: React.FC<ButtonProps> = ({ children, onClick, disabled, variant = 'primary' }) => {
+  return (
+    <button 
+      onClick={onClick} 
+      disabled={disabled}
+      className={`btn btn-${variant}`}
+    >
+      {children}
+    </button>
+  );
+};
+```
+
+### 2. 事件处理类型
+- 使用 React 提供的事件类型
+- 为事件处理函数提供正确的参数类型
+
+```tsx
+const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  setValue(event.target.value);
+};
+
+const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  // 处理表单提交
+};
+```
+
+### 3. Ref 类型
+- 使用 `useRef` 的正确类型
+- 为 DOM 元素 ref 提供具体类型
+
+```tsx
+const inputRef = useRef<HTMLInputElement>(null);
+const timerRef = useRef<NodeJS.Timeout | null>(null);
+```
+
+## 项目特定类型
+
+### 1. API 响应类型
+基于项目的 HTTP 请求封装，使用统一的响应类型：
+
+```tsx
+// 业务响应类型
+type ApiResponse<T> = {
+  code: number;
+  message: string;
+  result: T;
+};
+
+// 错误类型
+type ApiError = {
+  status?: number;
+  code?: string;
+  message: string;
+  details?: unknown;
+  isNetworkError?: boolean;
+  isTimeout?: boolean;
+  isCanceled?: boolean;
+};
+```
+
+### 2. 路由类型
+- 使用 React Router 提供的类型
+- 为路由参数提供类型定义
+
+```tsx
+// 路由参数类型
+interface UserParams {
+  id: string;
+}
+
+// 查询参数类型
+interface SearchParams {
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+```
+
+## 类型导入导出
+
+### 1. 类型导入
+- 使用 `import type` 导入类型
+- 区分类型导入和值导入
+
+```tsx
+import type { User, ApiResponse } from '@/services/types';
+import { Button } from '@/components';
+```
+
+### 2. 类型导出
+- 在类型文件中导出类型定义
+- 使用 `export type` 导出类型
+
+```tsx
+// types/index.ts
+export type { User, ApiResponse, ApiError };
+export interface ButtonProps {
+  // ...
+}
+```
+
+## 严格类型检查
+
+### 1. 启用严格模式
+项目已配置 TypeScript 严格模式，包括：
+- `strict: true`
+- `noImplicitAny: true`
+- `strictNullChecks: true`
+- `strictFunctionTypes: true`
+
+### 2. 类型安全实践
+- 避免使用 `any` 类型
+- 使用可选链操作符 `?.`
+- 使用空值合并操作符 `??`
+- 使用类型守卫进行类型检查
+
+```tsx
+// 推荐：使用可选链
+const userName = user?.profile?.name ?? 'Unknown';
+
+// 推荐：类型守卫
+if (isString(value)) {
+  // value 在这里被推断为 string 类型
+  console.log(value.toUpperCase());
+}
+```
+
+## 工具类型使用
+
+### 1. 内置工具类型
+- 使用 `Partial<T>` 创建可选类型
+- 使用 `Pick<T, K>` 选择特定属性
+- 使用 `Omit<T, K>` 排除特定属性
+
+```tsx
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+}
+
+// 创建用户更新类型（排除 id 和 password）
+type UserUpdate = Omit<User, 'id' | 'password'>;
+
+// 创建用户创建类型（所有属性可选）
+type UserCreate = Partial<User>;
+```
+
+### 2. 自定义工具类型
+- 创建项目特定的工具类型
+- 提高代码复用性
+
+```tsx
+// 创建可选类型
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// 创建必需类型
+type Required<T, K extends keyof T> = T & Required<Pick<T, K>>;
+```
+
+## 类型声明文件
+
+### 1. 全局类型声明
+- 在 `src/global.ts` 中定义全局类型
+- 使用 `declare global` 扩展全局类型
+
+```tsx
+// 扩展 React 命名空间
+declare global {
+  namespace React {
+    const Router: typeof import('react-router-dom');
+    const Http: typeof import('@/services/request').default;
+    const RouterRules: string[];
+    const navigate: (path: string) => void;
+  }
+}
+```
+
+### 2. 模块声明
+- 为第三方库提供类型声明
+- 使用 `declare module` 声明模块类型
+
+```tsx
+declare module '*.svg' {
+  const content: string;
+  export default content;
+}
+```
+
+## 代码风格规范
+
+### 命名规范
+```tsx
+// 变量和函数：camelCase
+const userName = 'john';
+const getUserData = () => {};
+
+// 常量：UPPER_SNAKE_CASE
+const API_BASE_URL = 'https://api.example.com';
+
+// 组件：PascalCase
+const UserProfile = () => {};
+
+// 接口和类型：PascalCase
+interface UserData {
+  id: number;
+  name: string;
+}
+
+type ApiResponse<T> = {
+  code: number;
+  result: T;
+};
+```
+
+### 导入导出规范
+```tsx
+// 导入顺序：React → 第三方库 → 内部模块 → 相对路径
+import React from 'react';
+import { userApi } from '@/services/api';
+import type { User } from '@/services/types/user';
+import './styles.css';
+
+// 优先使用具名导出
+export const UserProfile = () => {};
+export { UserCard, UserList };
+
+// 默认导出用于页面组件
+export default HomePage;
+```
+
+### 格式化规则
+- 使用 2 个空格缩进
+- 使用单引号
+- 行尾不添加分号
+- 对象和数组最后一个元素后添加逗号
+- 最大行长度 100 字符
+
+参考文件：
+- @src/services/request.ts
+- @src/auto-imports.d.ts
+- @tsconfig.json

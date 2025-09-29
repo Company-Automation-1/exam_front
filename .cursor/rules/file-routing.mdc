@@ -1,0 +1,131 @@
+---
+description: 项目文件路由系统配置和使用规范
+globs: ["src/views/**/*.tsx", "src/views/**/*.jsx"]
+alwaysApply: false
+---
+
+# 文件路由系统配置
+
+## 项目路由配置
+
+### Vite 配置
+```tsx
+// vite.config.ts
+import Pages from "vite-plugin-pages";
+
+Pages({
+  dirs: "src/views", // 生成路由的组件目录
+  exclude: ["**/components/*.tsx"], // 排除目录
+})
+```
+
+### App 路由配置
+```tsx
+// src/App.tsx
+import routes from '~react-pages';
+const navigate = useNavigate();
+React.navigate = navigate; // 全局导航函数
+
+<React.Suspense>
+  {useRoutes(routes)}
+</React.Suspense>
+```
+
+## 文件路由规则
+
+### 路由映射
+```
+src/views/
+├── index.tsx          → /
+├── about.tsx          → /about
+├── user/
+│   ├── index.tsx      → /user
+│   ├── profile.tsx    → /user/profile
+│   └── [id].tsx       → /user/:id
+└── dashboard/
+    ├── index.tsx      → /dashboard
+    └── analytics.tsx  → /dashboard/analytics
+```
+
+### 页面组件规范
+```tsx
+// src/views/user/profile.tsx
+const UserProfile: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('tab');
+
+  return (
+    <div>
+      <h1>用户资料</h1>
+      <p>用户ID: {id}</p>
+    </div>
+  );
+};
+
+export default UserProfile;
+```
+
+## 项目特定功能
+
+### 全局导航函数
+```tsx
+// 在 App.tsx 中设置
+React.navigate = navigate;
+
+// 在任何组件中使用
+const handleClick = () => {
+  React.navigate('/dashboard');
+};
+```
+
+### 路由参数处理
+```tsx
+// 路由参数
+const { id, slug } = useParams<{ id: string; slug: string }>();
+
+// 查询参数
+const [searchParams, setSearchParams] = useSearchParams();
+const page = searchParams.get('page') || '1';
+const filter = searchParams.get('filter') || 'all';
+
+// 更新查询参数
+setSearchParams({ page: '2', filter: 'active' });
+```
+
+## 项目最佳实践
+
+### 页面组织
+```
+src/views/
+├── index.tsx              # 首页
+├── 404.tsx               # 404页面
+├── login.tsx             # 登录页
+├── dashboard/            # 仪表板模块
+│   ├── index.tsx
+│   └── analytics.tsx
+└── user/                 # 用户模块
+    ├── index.tsx
+    ├── profile.tsx
+    └── [id].tsx
+```
+
+### 命名规范
+- 使用 kebab-case 命名文件
+- 动态路由使用 `[param].tsx` 格式
+- 页面组件使用 PascalCase 命名
+
+### 性能优化
+```tsx
+// 代码分割
+const Dashboard = React.lazy(() => import('./dashboard/index'));
+
+<React.Suspense fallback={<div>加载中...</div>}>
+  {useRoutes(routes)}
+</React.Suspense>
+```
+
+参考文件：
+- @src/App.tsx
+- @src/views/index.tsx
+- @vite.config.ts

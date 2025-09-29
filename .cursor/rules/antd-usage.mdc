@@ -1,0 +1,71 @@
+---
+description: Ant Design自动导入配置
+globs: ["**/*.tsx", "**/*.jsx"]
+alwaysApply: false
+---
+
+# Ant Design 自动导入配置
+
+## 自动导入说明
+
+项目已配置 Ant Design 组件自动导入，无需手动导入即可使用：
+
+```tsx
+// 无需导入，直接使用
+<Button type="primary">按钮</Button>
+<Input placeholder="请输入内容" />
+<Table dataSource={data} columns={columns} />
+```
+
+## 配置详情
+
+### Vite 配置
+```tsx
+// vite.config.ts
+import AntdResolver from "unplugin-auto-import-antd";
+
+AutoImport({
+  resolvers: [AntdResolver()],
+})
+```
+
+### 支持的组件
+所有 Ant Design 组件都已配置自动导入，包括：
+- 基础组件：Button, Input, Select, DatePicker 等
+- 布局组件：Row, Col, Space, Divider 等
+- 导航组件：Menu, Breadcrumb, Pagination 等
+- 数据展示：Table, List, Card, Descriptions 等
+- 反馈组件：Modal, Message, Notification, Drawer 等
+- 其他组件：Form, Upload, Tree, Transfer 等
+
+## 使用注意事项
+
+1. **无需手动导入** - 所有 Antd 组件都可以直接使用
+2. **类型支持** - 自动导入包含完整的 TypeScript 类型支持
+3. **按需加载** - 只有使用的组件才会被打包
+4. **图标组件** - 图标组件需要单独导入，如 `import { SearchOutlined } from '@ant-design/icons'`
+
+## 主题配置
+
+如需自定义主题，在 `src/main.tsx` 中配置：
+
+```tsx
+import { ConfigProvider } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
+
+<ConfigProvider
+  locale={zhCN}
+  theme={{
+    token: {
+      colorPrimary: '#1890ff',
+      borderRadius: 6,
+    },
+  }}
+>
+  {/* 应用内容 */}
+</ConfigProvider>
+```
+
+参考文件：
+- @vite.config.ts
+- @src/views/page1/index.tsx
