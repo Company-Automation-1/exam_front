@@ -129,7 +129,6 @@ const expensiveValue = useMemo(() => {
 项目已配置自动导入，无需手动导入以下内容：
 - React Hooks 和工具函数（useState, useEffect, useCallback, useMemo 等）
 - React Router 组件（Link, NavLink 等）
-- Antd 组件（Button, Form, Input, Table 等）
 
 **注意**：React 本身仍需要手动导入
 

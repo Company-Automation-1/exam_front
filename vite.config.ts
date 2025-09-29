@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react'
 // 引入自动引入HOOK
 import AutoImport from "unplugin-auto-import/vite";
 
-// 引入 Antd 组件自动导入
-import AntdResolver from "unplugin-auto-import-antd";
-
 // 引入自动生成路由
 import Pages from "vite-plugin-pages";
 
@@ -22,8 +19,6 @@ export default defineConfig({
       imports: ["react", "react-router-dom"],
       // 生成全局自动引入配置文件
       dts: "./src/auto-imports.d.ts",
-      // 配置 Antd 组件自动导入
-      resolvers: [AntdResolver()],
     }),
     Pages({
         dirs: "src/views", // 需要生成路由的组件目录
