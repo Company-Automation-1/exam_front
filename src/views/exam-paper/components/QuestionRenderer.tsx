@@ -15,6 +15,14 @@ interface QuestionRendererProps {
   onChange: (value: AnswerValue) => void;
 }
 
+/**
+ * 题目渲染组件
+ * @param currentIndex 当前题目索引
+ * @param total 总题目数
+ * @param question 题目
+ * @param value 用户作答值
+ * @param onChange 用户作答值改变回调
+ */
 const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   currentIndex,
   total,

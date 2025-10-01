@@ -34,24 +34,10 @@ export default {
     // 主题非空与末尾不加句号
     'subject-empty': [2, 'never'],
     'subject-full-stop': [2, 'never', '.'],
-    // 与项目模块对应的精简 scope 列表（高层模块即可）
-    'scope-enum': [
-      2,
-      'always',
-      [
-        'app',
-        'views',
-        'components',
-        'services',
-        'config',
-        'build',
-        'ci',
-        'deps',
-        'docs',
-      ],
-    ],
   },
   prompt: {
+    // 允许自定义 scope
+    allowCustomScopes: true,
     types: [
       { value: 'feat', name: 'feat: ✨ 新功能: 新增新功能' },
       { value: 'fix', name: 'fix: 🐛 修复: 修复Bug' },
@@ -70,8 +56,8 @@ export default {
       { value: 'release', name: 'release: 🚀 发布: 发布版本' },
       { value: 'update', name: 'update: ♻️ 更新: 常规更新' },
     ],
-    // 允许自定义 scope
-    allowCustomScopes: true,
+    // 允许空 scope
+    allowEmptyScopes: true,
     // 跳过不常用问题
     skipQuestions: ['body', 'footerPrefix', 'footer', 'breaking'],
     // 自定义交互提示文案
@@ -99,6 +85,7 @@ export default {
       { value: 'ci', name: 'ci: 持续集成/流水线' },
       { value: 'deps', name: 'deps: 依赖与锁文件' },
       { value: 'docs', name: 'docs: 文档' },
+      { value: 'auth', name: 'auth: 认证相关' },
     ],
   },
 };

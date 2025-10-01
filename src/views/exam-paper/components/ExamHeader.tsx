@@ -13,6 +13,16 @@ interface ExamHeaderProps {
   onBack: () => void;
 }
 
+/**
+ * 考试头部组件
+ * @param title 标题
+ * @param progressText 进度文本
+ * @param progressPercent 进度百分比
+ * @param leftTimeText 剩余时间文本
+ * @param isMobile 是否为移动端
+ * @param onSubmit 提交回调
+ * @param onBack 返回回调
+ */
 const ExamHeader: React.FC<ExamHeaderProps> = ({
   title,
   progressText,

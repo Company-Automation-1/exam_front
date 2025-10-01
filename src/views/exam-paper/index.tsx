@@ -1,101 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-// import { Link } from 'react-router-dom';
-import { Layout, Grid, FloatButton } from 'antd';
+import React from 'react';
+import { Layout, Grid, FloatButton, message } from 'antd';
 import {
   ExamBottomBar,
   QuestionRenderer,
   ExamHeader,
   AnswerSheetModal,
 } from './components';
-import type { Question } from './components';
 import type { AnswerValue } from './components/Question.types';
+import { examApi } from '@/services/api';
+import type { ExamPaper, UserAnswer } from '@/services/types';
+import NotFoundPage from '@/views/404';
 
 import styles from './index.module.css';
 
 // Question 类型已由组件导出
-
-interface Paper {
-  paperId: string;
-  title: string;
-  durationSec: number;
-  questions: Question[];
-}
-
-const demoPaper: Paper = {
-  paperId: 'demo-1',
-  title: '示例试卷',
-  durationSec: 120,
-  questions: [
-    {
-      id: 'q1',
-      stem: '1. React 中用于描述 UI 的基本单位是？',
-      options: ['Component', 'Service', 'Controller', 'Mixin'],
-    },
-    {
-      id: 'q2',
-      stem: '2. 以下哪项常用于管理路由？',
-      options: ['redux', 'react-router', 'jotai', 'zustand'],
-    },
-    {
-      id: 'q3',
-      stem: '3. Vite 的主要优势是？',
-      options: [
-        '运行时编译',
-        '基于 Webpack 构建',
-        '更快的冷启动',
-        '仅支持 Node 运行',
-      ],
-    },
-    {
-      id: 'q4',
-      stem: '4. React 19 推荐的状态更新 API 是？',
-      options: ['setState 回调', 'useState Hook', 'this.forceUpdate', 'MobX'],
-    },
-    {
-      id: 'q5',
-      stem: '5. 在 React Router 中用于声明式导航的组件是？',
-      options: ['Link', 'NavigateFunction', 'Outlet', 'Switch'],
-    },
-    {
-      id: 'q6',
-      stem: '6. Ant Design 中用于栅格布局的组件组合是？',
-      options: ['Grid + Item', 'Row + Col', 'Flex + Box', 'Layout + Header'],
-    },
-    {
-      id: 'q7',
-      stem: '7. TypeScript 中用于表示可选属性的语法是？',
-      options: ['name?', 'name!', 'name*', 'name$'],
-    },
-    {
-      id: 'q8',
-      stem: '8. 以下哪项可以减少不必要的重新渲染？',
-      options: [
-        'useMemo/useCallback',
-        '增加 key',
-        '改用 any 类型',
-        '启用 StrictMode',
-      ],
-    },
-    {
-      id: 'q9',
-      type: 'multiple',
-      stem: '9. 下列哪些属于 React 的 Hook？',
-      options: ['useState', 'useFetch', 'useEffect', 'useAjax'],
-    },
-    {
-      id: 'q10',
-      type: 'blank',
-      stem: '10. 请填写 Vite 的主要构建工具：',
-      options: [],
-    },
-    {
-      id: 'q11',
-      type: 'text',
-      stem: '11. 简述你对受控组件与非受控组件的理解。',
-      options: [],
-    },
-  ],
-};
 
 const formatSeconds = (s: number) => {
   const mm = String(Math.floor(s / 60)).padStart(2, '0');
@@ -104,43 +22,127 @@ const formatSeconds = (s: number) => {
 };
 
 const ExamPaper: React.FC = () => {
-  const screens = Grid.useBreakpoint();
+  const screens = Grid.useBreakpoint(); // 判断是否为移动端
   const isMobile = !screens.md;
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
-  const [leftSeconds, setLeftSeconds] = useState(demoPaper.durationSec);
-  const [listMode, setListMode] = useState<boolean>(false);
-  const [listReturnIndex, setListReturnIndex] = useState<number | null>(null);
-  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
-  const questions = demoPaper.questions;
+  // 先检查URL参数，避免页面闪烁
+  const urlParams = new URLSearchParams(window.location.search);
+  const paperId = urlParams.get('paperId');
+
+  const [currentIndex, setCurrentIndex] = useState<number>(0); // 当前题目索引
+  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({}); // 用户作答记录
+  const [leftSeconds, setLeftSeconds] = useState<number>(0); // 剩余时间
+  const [listMode, setListMode] = useState<boolean>(false); // 列表模式
+  const [listReturnIndex, setListReturnIndex] = useState<number | null>(null); // 列表返回索引
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false); // 答题卡弹窗
+  const [paper, setPaper] = useState<ExamPaper | null>(null); // 试卷数据
+  const [recordId, setRecordId] = useState<string | null>(null); // 考试记录ID
+  const [loading, setLoading] = useState<boolean>(true); // 加载状态
+  const initializedRef = useRef<boolean>(false); // 防止重复初始化
+
+  const questions = useMemo(() => paper?.questions || [], [paper?.questions]); // 题目列表
+
+  // 当前题目
   const currentQuestion = useMemo(
     () => questions[currentIndex],
     [questions, currentIndex]
   );
+  // 进度文本
   const progressText = useMemo(() => {
     const cur = listMode ? questions.length : currentIndex + 1;
     return `${cur}/${questions.length}`;
   }, [currentIndex, questions.length, listMode]);
+  // 进度百分比
   const progressPercent = useMemo(() => {
     const cur = listMode ? questions.length : currentIndex + 1;
     return Math.round((cur / questions.length) * 100);
   }, [currentIndex, questions.length, listMode]);
 
+  // 初始化考试
+  const initializeExam = useCallback(async () => {
+    // 防止重复初始化
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    try {
+      setLoading(true);
+      // 开始考试
+      if (!paperId) {
+        return (
+          <NotFoundPage
+            status="error"
+            title="暂无试卷"
+            subTitle="请检查试卷ID是否正确"
+            showBackButton={false}
+          />
+        );
+      }
+
+      const startResponse = await examApi.startExam({ paperId: paperId! });
+
+      setPaper(startResponse.paper);
+      setRecordId(startResponse.recordId);
+      setLeftSeconds(startResponse.paper.durationSec);
+
+      message.success('考试开始！');
+    } catch (error) {
+      console.error('初始化考试失败:', error);
+      message.error('初始化考试失败，请重试');
+      React.navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  }, [paperId]);
+
+  // 提交试卷
   const handleSubmit = useCallback(
-    (auto: boolean = false) => {
+    async (auto: boolean = false) => {
+      if (!paper || !recordId) return;
+
       if (!auto) {
         const ok = window.confirm('确认交卷吗？');
         if (!ok) return;
       }
-      alert(
-        `已提交！用时：${formatSeconds(demoPaper.durationSec - leftSeconds)}`
-      );
+
+      try {
+        // 将答案转换为API格式
+        const userAnswers: UserAnswer[] = Object.entries(answers).map(
+          ([questionId, answer]) => ({
+            questionId,
+            answer,
+            answeredAt: new Date().toISOString(),
+          })
+        );
+
+        // 提交考试
+        const submitResponse = await examApi.submitExam({
+          recordId,
+          answers: userAnswers,
+        });
+
+        message.success(
+          `考试提交成功！得分：${submitResponse.score}/${submitResponse.totalScore}`
+        );
+
+        // 跳转到结果页面或首页
+        React.navigate('/');
+      } catch (error) {
+        console.error('提交考试失败:', error);
+        message.error('提交考试失败，请重试');
+      }
     },
-    [leftSeconds]
+    [paper, recordId, answers]
   );
 
+  // 初始化考试
   useEffect(() => {
+    initializeExam();
+  }, [initializeExam]);
+
+  // 倒计时
+  useEffect(() => {
+    if (!paper || leftSeconds <= 0) return;
+
     const timer = setInterval(() => {
       setLeftSeconds((prev) => {
         if (prev <= 1) {
@@ -152,12 +154,31 @@ const ExamPaper: React.FC = () => {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [handleSubmit]);
+  }, [handleSubmit, paper, leftSeconds]);
 
-  const handleChoose = useCallback((qid: string, value: AnswerValue) => {
-    setAnswers((prev) => ({ ...prev, [qid]: value }));
-  }, []);
+  // 选择答案
+  const handleChoose = useCallback(
+    async (qid: string, value: AnswerValue) => {
+      setAnswers((prev) => ({ ...prev, [qid]: value }));
 
+      // 自动提交答案到服务器（添加防抖）
+      if (recordId) {
+        try {
+          await examApi.submitAnswer({
+            recordId,
+            questionId: qid,
+            answer: value,
+          });
+        } catch (error) {
+          console.error('提交答案失败:', error);
+          // 不显示错误消息，避免干扰用户体验
+        }
+      }
+    },
+    [recordId]
+  );
+
+  // 跳转到指定题目
   const goto = useCallback(
     (idx: number) => {
       if (idx < 0 || idx >= questions.length) return;
@@ -166,6 +187,7 @@ const ExamPaper: React.FC = () => {
     [questions.length]
   );
 
+  // 上一题
   const handlePrev = useCallback(() => {
     if (listMode) {
       setListMode(false);
@@ -177,6 +199,7 @@ const ExamPaper: React.FC = () => {
     goto(currentIndex - 1);
   }, [currentIndex, goto, listMode, listReturnIndex, questions.length]);
 
+  // 下一题
   const handleNext = useCallback(() => {
     if (listMode) {
       handleSubmit(false);
@@ -198,6 +221,42 @@ const ExamPaper: React.FC = () => {
     goto(currentIndex + 1);
   }, [currentIndex, goto, handleSubmit, listMode, questions.length]);
 
+  // 加载状态
+  if (loading) {
+    return (
+      <Layout style={{ minHeight: '100vh' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100vh',
+            background: '#fafafa',
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '18px', marginBottom: '16px' }}>
+              正在加载考试...
+            </div>
+            <div>请稍候</div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // 试卷不存在
+  if (!paper) {
+    return (
+      <NotFoundPage
+        status="error"
+        title="试卷不存在"
+        subTitle="请检查试卷ID是否正确"
+        showBackButton={false}
+      />
+    );
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <div
@@ -208,7 +267,7 @@ const ExamPaper: React.FC = () => {
           background: '#fafafa',
         }}
       >
-        {/* 顶部操作区（占自身高度，可 sticky） */}
+        {/* 顶部操作区（sticky） */}
         <div
           style={{
             position: 'sticky',
@@ -227,7 +286,7 @@ const ExamPaper: React.FC = () => {
             }}
           >
             <ExamHeader
-              title={demoPaper.title}
+              title={paper.title}
               progressText={progressText}
               progressPercent={progressPercent}
               leftTimeText={formatSeconds(leftSeconds)}
@@ -284,7 +343,7 @@ const ExamPaper: React.FC = () => {
           </div>
         </div>
 
-        {/* 底部操作区（占自身高度，不 sticky） */}
+        {/* 底部操作区（sticky） */}
         <div
           style={{
             background: '#fff',
@@ -320,6 +379,8 @@ const ExamPaper: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 答题卡弹窗 */}
       <AnswerSheetModal
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
@@ -338,6 +399,8 @@ const ExamPaper: React.FC = () => {
           setListMode(true);
         }}
       />
+
+      {/* 回到顶部按钮 */}
       <FloatButton.BackTop
         visibilityHeight={400}
         className={styles.backtop}

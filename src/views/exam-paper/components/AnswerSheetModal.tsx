@@ -12,6 +12,16 @@ interface AnswerSheetModalProps {
   onBrowseAll: () => void;
 }
 
+/**
+ * 答题卡弹窗组件
+ * @param open 是否显示弹窗
+ * @param onClose 关闭弹窗的回调
+ * @param questions 题目列表
+ * @param answers 用户作答记录，key 为题目 id
+ * @param highlightIndex 当前高亮的题目索引（可选）
+ * @param onGoto 跳转到指定题目的回调
+ * @param onBrowseAll 整卷浏览回调
+ */
 const AnswerSheetModal: React.FC<AnswerSheetModalProps> = ({
   open,
   onClose,
@@ -45,6 +55,9 @@ const AnswerSheetModal: React.FC<AnswerSheetModalProps> = ({
     items: { q: Question; idx: number }[];
   }[];
 
+  /**
+   * 渲染单个题号按钮
+   */
   const renderItem = (q: Question, index: number) => {
     const value = answers[q.id];
     const answered = Array.isArray(value)
