@@ -7,6 +7,9 @@ import AutoImport from "unplugin-auto-import/vite";
 // 引入自动生成路由
 import Pages from "vite-plugin-pages";
 
+// 引入 mock 插件
+import { viteMockServe } from 'vite-plugin-mock'
+
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -23,6 +26,12 @@ export default defineConfig({
     Pages({
         dirs: "src/views", // 需要生成路由的组件目录
         exclude: ["**/components/*.tsx"], // 排除在外的目录，即所有 components 目录下的 .tsx 文件都不会生成路由
+    }),
+    // Mock 插件配置
+    viteMockServe({
+      mockPath: 'mock', // mock 文件目录
+      enable: true, // 是否启用 mock
+      watchFiles: true, // 监听文件变化
     }),
   ],
   resolve: {

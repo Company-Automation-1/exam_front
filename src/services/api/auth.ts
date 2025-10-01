@@ -1,4 +1,4 @@
-import request from '@/services/request';
+import React from 'react';
 import type {
   LoginRequest,
   LoginApiResponse,
@@ -11,17 +11,17 @@ import type {
 export const authApi = {
   // 用户登录
   login: (credentials: LoginRequest) =>
-    request.post<LoginApiResponse>('/api/auth/login', credentials),
+    React.Http.post<LoginApiResponse>('/api/auth/login', credentials),
 
   // 用户登出
-  logout: () => request.post<LogoutApiResponse>('/api/auth/logout'),
+  logout: () => React.Http.post<LogoutApiResponse>('/api/auth/logout'),
 
   // 刷新令牌
   refreshToken: (refreshToken: string) =>
-    request.post<RefreshTokenApiResponse>('/api/auth/refresh', {
+    React.Http.post<RefreshTokenApiResponse>('/api/auth/refresh', {
       refreshToken,
     }),
 
   // 获取用户信息
-  getProfile: () => request.get<GetProfileApiResponse>('/api/auth/profile'),
+  getProfile: () => React.Http.get<GetProfileApiResponse>('/api/auth/profile'),
 };

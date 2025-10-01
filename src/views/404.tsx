@@ -1,7 +1,19 @@
 import React from 'react';
 import { Result, Button } from 'antd';
 
-const NotFoundPage: React.FC = () => {
+interface NotFoundPageProps {
+  status?: '404' | '403' | '500' | 'error';
+  title?: string;
+  subTitle?: string;
+  showBackButton?: boolean;
+}
+
+const NotFoundPage: React.FC<NotFoundPageProps> = ({
+  status = '404',
+  title = '404',
+  subTitle = '抱歉，您访问的页面不存在。',
+  showBackButton = true,
+}) => {
   const handleGoHome = () => {
     React.navigate('/');
   };
@@ -10,6 +22,20 @@ const NotFoundPage: React.FC = () => {
     window.history.back();
   };
 
+  const buttons = [
+    <Button type="primary" key="home" onClick={handleGoHome}>
+      返回首页
+    </Button>,
+  ];
+
+  if (showBackButton) {
+    buttons.push(
+      <Button key="back" onClick={handleGoBack}>
+        返回上页
+      </Button>
+    );
+  }
+
   return (
     <div
       style={{
@@ -17,21 +43,13 @@ const NotFoundPage: React.FC = () => {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
-        padding: '20px',
       }}
     >
       <Result
-        status="404"
-        title="404"
-        subTitle="抱歉，您访问的页面不存在。"
-        extra={[
-          <Button type="primary" key="home" onClick={handleGoHome}>
-            返回首页
-          </Button>,
-          <Button key="back" onClick={handleGoBack}>
-            返回上页
-          </Button>,
-        ]}
+        status={status}
+        title={title}
+        subTitle={subTitle}
+        extra={buttons}
       />
     </div>
   );
