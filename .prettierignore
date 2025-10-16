@@ -1,0 +1,8 @@
+*
+!src/
+!src/**/*
+
+# 工程配置文件
+!vite.config.js
+!eslint.config.js
+!vercel.json

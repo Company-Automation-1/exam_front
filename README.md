@@ -1,16 +1,16 @@
-# React + Vite
+# README
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### App.jsx
+```jsx
+// App.jsx 的完整结构
+<AuthProvider>           // 第1层：认证上下文
+  <RouterProvider>       // 第2层：路由系统
+    <RootLayout>         // 第3层：根布局
+      <useRouteGuard />  // 第4层：路由守卫
+      <React.Suspense>  // 第5层：懒加载
+        <Outlet />       // 第6层：页面渲染
+      </React.Suspense>
+    </RootLayout>
+  </RouterProvider>
+</AuthProvider>
+```
