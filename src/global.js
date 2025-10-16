@@ -24,4 +24,12 @@ React.RouterRules = [
     : []),
 ];
 
+// 不需要布局的页面路径配置
+React.NoLayoutPaths = [
+  '/',
+  '/login',
+  '/register',
+  '/404',
+];
+
 export default {};

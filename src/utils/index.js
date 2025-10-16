@@ -3,15 +3,13 @@
  */
 
 // HTTP 请求相关
-export { http, axios, cancelRequest, cancelAllRequests } from './request.js';
+export { http, cancelRequest, cancelAllRequests } from './request.js';
 
 // Token 管理相关
 export {
   setToken,
   getToken,
-  getRefreshToken,
   removeToken,
-  isTokenValid,
   isTokenExpired,
 } from './token.js';
 

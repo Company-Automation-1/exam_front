@@ -4,21 +4,17 @@
  */
 
 import axios from 'axios';
-import { getApiConfig } from '../config/env.js';
-import { getToken, removeToken, setToken } from './token.js';
-
-// 获取环境配置
-const apiConfig = getApiConfig();
+import { getToken, removeToken } from './token.js';
 
 // 请求取消控制器映射
 const cancelTokenMap = new Map();
 
-// 请求去重映射
+// 请求去重映射 (GET 请求去重)
 const pendingRequests = new Map();
 
-// 刷新状态管理
-let isRefreshing = false;
-let refreshPromise = null;
+// 全局登出锁，防止并发 401 多次触发登出
+let isLoggingOut = false;
+
 
 /**
  * 网络错误处理函数
@@ -42,44 +38,17 @@ const createNetworkError = (message, code, error = null) => {
  * @returns {Promise} 处理结果
  */
 const handle401Error = async (error) => {
-  const refreshToken = getToken('refresh');
 
-  if (!refreshToken) {
-    removeToken('all');
+  if (isLoggingOut) {
     return Promise.reject(error.response);
   }
 
-  // 如果正在刷新，等待刷新完成
-  if (isRefreshing) {
-    return refreshPromise.then(() => {
-      return request(error.config);
-    });
-  }
+  // 标记为已处理
+  isLoggingOut = true;
 
-  // 开始刷新
-  isRefreshing = true;
-  refreshPromise = request
-    .post('/auth/refresh', { refreshToken })
-    .then((response) => {
-      setToken(response.accessToken, 'access');
-      setToken(response.refreshToken, 'refresh');
-      return response;
-    })
-    .catch(() => {
-      removeToken('all');
-      throw new Error('Token refresh failed');
-    })
-    .finally(() => {
-      isRefreshing = false;
-      refreshPromise = null;
-    });
-
-  try {
-    await refreshPromise;
-    return request(error.config);
-  } catch {
-    return Promise.reject(error.response);
-  }
+  // 单令牌模式下，直接清除token并跳转到登录页
+  removeToken();
+  return Promise.reject(error.response);
 };
 
 /**
@@ -122,10 +91,8 @@ const handleHttpError = (error) => {
 };
 
 // 创建 axios 实例
-const request = axios.create({
-  baseURL: apiConfig.baseURL,
-  timeout: apiConfig.timeout,
-  withCredentials: apiConfig.withCredentials,
+export const request = axios.create({
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -135,15 +102,18 @@ const request = axios.create({
 request.interceptors.request.use(
   (config) => {
     // 添加 token
-    const token = getToken('access');
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      // 检测到有效 token 时，重置登出状态
+      isLoggingOut = false;
     }
 
-    // 请求去重：检查是否有相同的请求正在进行
+    // 请求去重：只对 GET 请求进行去重
     const requestKey = `${config.method?.toUpperCase()}:${config.url}`;
-    if (pendingRequests.has(requestKey)) {
-      return Promise.reject(new Error('请求重复，已取消'));
+    if (config.method?.toUpperCase() === 'GET' && pendingRequests.has(requestKey)) {
+      console.log('🔄 GET请求重复，已取消:', requestKey);
+      return Promise.reject(new Error('GET请求重复，已取消'));
     }
 
     // 生成请求 ID 用于取消请求（优化性能）
@@ -154,7 +124,11 @@ request.interceptors.request.use(
     const controller = new AbortController();
     config.signal = controller.signal;
     cancelTokenMap.set(requestId, controller);
-    pendingRequests.set(requestKey, controller);
+    
+    // 只对 GET 请求进行去重存储
+    if (config.method?.toUpperCase() === 'GET') {
+      pendingRequests.set(requestKey, controller);
+    }
 
     return config;
   },
@@ -172,8 +146,11 @@ request.interceptors.response.use(
       cancelTokenMap.delete(response.config.requestId);
     }
 
-    const requestKey = `${response.config.method?.toUpperCase()}:${response.config.url}`;
-    pendingRequests.delete(requestKey);
+    // 只清理 GET 请求的去重映射
+    if (response.config.method?.toUpperCase() === 'GET') {
+      const requestKey = `${response.config.method?.toUpperCase()}:${response.config.url}`;
+      pendingRequests.delete(requestKey);
+    }
 
     // 直接返回原始响应数据，保持后端数据格式
     return response.data;
@@ -264,20 +241,20 @@ export const http = {
    */
   upload: (url, data = {}, config = {}) => {
     const formData = new FormData();
-
-    // 处理上传数据
+  
     if (data && typeof data === 'object') {
       Object.keys(data).forEach((key) => {
-        if (Array.isArray(data[key])) {
-          data[key].forEach((item) => {
-            formData.append(`${key}[]`, item);
+        const value = data[key];
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            formData.append(`${key}[]`, item); // File/Blob 会被正确处理
           });
         } else {
-          formData.append(key, data[key]);
+          formData.append(key, value); // File/Blob 会被正确处理
         }
       });
     }
-
+  
     return request.post(url, formData, {
       ...config,
       headers: {

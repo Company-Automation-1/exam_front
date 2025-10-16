@@ -4,10 +4,7 @@
  */
 
 // Token 存储键名常量
-const TOKEN_KEYS = {
-  ACCESS_TOKEN: 'accessToken',
-  REFRESH_TOKEN: 'refreshToken',
-};
+const TOKEN_KEY = 'token';
 
 /**
  * 安全地执行 localStorage 操作
@@ -26,41 +23,27 @@ const safeLocalStorage = (operation, defaultValue = null) => {
 /**
  * 设置 token
  * @param {string} token - token 值
- * @param {'access' | 'refresh'} type - token 类型，默认为 'access'
  */
-export const setToken = (token, type = 'access') => {
+export const setToken = (token) => {
   safeLocalStorage(() => {
-    const key =
-      type === 'refresh' ? TOKEN_KEYS.REFRESH_TOKEN : TOKEN_KEYS.ACCESS_TOKEN;
-    localStorage.setItem(key, token);
+    localStorage.setItem(TOKEN_KEY, token);
   });
 };
 
 /**
  * 获取 token
- * @param {'access' | 'refresh'} type - token 类型，默认为 'access'
  * @returns {string|null} token 或 null
  */
-export const getToken = (type = 'access') => {
-  const key =
-    type === 'refresh' ? TOKEN_KEYS.REFRESH_TOKEN : TOKEN_KEYS.ACCESS_TOKEN;
-  return safeLocalStorage(() => localStorage.getItem(key));
+export const getToken = () => {
+  return safeLocalStorage(() => localStorage.getItem(TOKEN_KEY));
 };
 
 /**
  * 删除 token
- * @param {'access' | 'refresh' | 'all'} type - token 类型，默认为 'all'
  */
-export const removeToken = (type = 'all') => {
+export const removeToken = () => {
   safeLocalStorage(() => {
-    if (type === 'all') {
-      localStorage.removeItem(TOKEN_KEYS.ACCESS_TOKEN);
-      localStorage.removeItem(TOKEN_KEYS.REFRESH_TOKEN);
-    } else {
-      const key =
-        type === 'refresh' ? TOKEN_KEYS.REFRESH_TOKEN : TOKEN_KEYS.ACCESS_TOKEN;
-      localStorage.removeItem(key);
-    }
+    localStorage.removeItem(TOKEN_KEY);
   });
 };
 
