@@ -25,11 +25,17 @@ React.RouterRules = [
 ];
 
 // 不需要布局的页面路径配置
+// 支持精确匹配和通配符匹配
 React.NoLayoutPaths = [
   '/',
   '/login',
   '/register',
   '/404',
+  ...(isDev()
+    ? [
+        '/dev/*', // 通配符匹配：所有 /dev/ 开头的页面
+      ]
+    : []),
 ];
 
 export default {};
