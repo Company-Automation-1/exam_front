@@ -13,16 +13,19 @@ export const AuthProvider = ({ children }) => {
 
   const isAuthenticated = !!user;
 
-  const value = useMemo(() => ({
-    // 状态
-    user,
-    isLoading,
-    isAuthenticated,
-    
-    // 状态更新方法
-    setUser,
-    setIsLoading,
-  }), [user, isLoading, isAuthenticated]);
+  const value = useMemo(
+    () => ({
+      // 状态
+      user,
+      isLoading,
+      isAuthenticated,
+
+      // 状态更新方法
+      setUser,
+      setIsLoading,
+    }),
+    [user, isLoading, isAuthenticated]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

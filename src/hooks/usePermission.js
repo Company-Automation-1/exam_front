@@ -1,4 +1,3 @@
-
 import { useAuth } from './useAuth';
 
 /**
@@ -8,15 +7,17 @@ import { useAuth } from './useAuth';
 export const usePermission = () => {
   const { user } = useAuth();
   const userAccess = user?.access;
-  
+
   return {
     // 基础权限 - 权限包含关系（参考 admin/access.ts）
     canSuperAdmin: userAccess === 'super_admin',
     canAdmin: userAccess === 'admin' || userAccess === 'super_admin',
-    canUser: userAccess === 'user' || userAccess === 'admin' || userAccess === 'super_admin',
-    
+    canUser:
+      userAccess === 'user' ||
+      userAccess === 'admin' ||
+      userAccess === 'super_admin',
+
     // 用户信息
     userAccess,
   };
 };
-  

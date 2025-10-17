@@ -15,7 +15,6 @@ const pendingRequests = new Map();
 // 全局登出锁，防止并发 401 多次触发登出
 let isLoggingOut = false;
 
-
 /**
  * 网络错误处理函数
  * @param {string} message - 错误消息
@@ -38,7 +37,6 @@ const createNetworkError = (message, code, error = null) => {
  * @returns {Promise} 处理结果
  */
 const handle401Error = async (error) => {
-
   if (isLoggingOut) {
     return Promise.reject(error.response);
   }
@@ -111,7 +109,10 @@ request.interceptors.request.use(
 
     // 请求去重：只对 GET 请求进行去重
     const requestKey = `${config.method?.toUpperCase()}:${config.url}`;
-    if (config.method?.toUpperCase() === 'GET' && pendingRequests.has(requestKey)) {
+    if (
+      config.method?.toUpperCase() === 'GET' &&
+      pendingRequests.has(requestKey)
+    ) {
       console.log('🔄 GET请求重复，已取消:', requestKey);
       return Promise.reject(new Error('GET请求重复，已取消'));
     }
@@ -124,7 +125,7 @@ request.interceptors.request.use(
     const controller = new AbortController();
     config.signal = controller.signal;
     cancelTokenMap.set(requestId, controller);
-    
+
     // 只对 GET 请求进行去重存储
     if (config.method?.toUpperCase() === 'GET') {
       pendingRequests.set(requestKey, controller);
@@ -241,7 +242,7 @@ export const http = {
    */
   upload: (url, data = {}, config = {}) => {
     const formData = new FormData();
-  
+
     if (data && typeof data === 'object') {
       Object.keys(data).forEach((key) => {
         const value = data[key];
@@ -254,7 +255,7 @@ export const http = {
         }
       });
     }
-  
+
     return request.post(url, formData, {
       ...config,
       headers: {

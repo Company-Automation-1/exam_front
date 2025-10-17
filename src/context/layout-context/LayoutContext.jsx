@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 
 const LayoutContext = createContext();
 
@@ -7,7 +13,7 @@ export const LayoutProvider = ({ children }) => {
 
   // 使用useCallback缓存setUseLayout函数
   const toggleLayout = useCallback(() => {
-    setUseLayout(prev => !prev);
+    setUseLayout((prev) => !prev);
   }, []);
 
   const setLayout = useCallback((value) => {
@@ -15,17 +21,18 @@ export const LayoutProvider = ({ children }) => {
   }, []);
 
   // 使用useMemo缓存value，只有依赖变化时才重新创建
-  const value = useMemo(() => ({
-    useLayout,
-    setUseLayout,
-    toggleLayout,
-    setLayout,
-  }), [useLayout, setUseLayout, toggleLayout, setLayout]);
+  const value = useMemo(
+    () => ({
+      useLayout,
+      setUseLayout,
+      toggleLayout,
+      setLayout,
+    }),
+    [useLayout, setUseLayout, toggleLayout, setLayout]
+  );
 
   return (
-    <LayoutContext.Provider value={value}>
-      {children}
-    </LayoutContext.Provider>
+    <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
   );
 };
 

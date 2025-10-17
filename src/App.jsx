@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-// import './App.css';
 
 // 引入 react-router-dom 中的路由相关 API
 import {
@@ -44,7 +43,7 @@ const RootLayout = () => {
 
   // 使用 useRef 防止重复初始化
   const isInitiated = useRef(false);
-  
+
   // 初始化认证状态
   useEffect(() => {
     const initAuth = async () => {
@@ -72,7 +71,7 @@ const RootLayout = () => {
     };
 
     initAuth();
-    
+
     // 返回清理函数（StrictMode 需要）
     return () => {
       // 重置加载状态，避免状态不一致

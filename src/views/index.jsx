@@ -5,7 +5,7 @@ import { removeToken } from '@/utils/token';
 
 const Index = () => {
   const { setUser } = useAuth();
-  
+
   const handleLogout = () => {
     setUser(null);
     removeToken();
@@ -13,15 +13,27 @@ const Index = () => {
 
   return (
     <>
-      <Button type="primary" onClick={handleLogout}>logout</Button>
-      <Button type="primary" onClick={() => {
-        React.navigate('/login');
-      }}>Login</Button>
-      <Button type="primary" onClick={() => {
-        React.navigate('/about');
-      }}>About</Button>
+      <Button type="primary" onClick={handleLogout}>
+        logout
+      </Button>
+      <Button
+        type="primary"
+        onClick={() => {
+          React.navigate('/login');
+        }}
+      >
+        Login
+      </Button>
+      <Button
+        type="primary"
+        onClick={() => {
+          React.navigate('/about');
+        }}
+      >
+        About
+      </Button>
     </>
-  )
-}
+  );
+};
 
 export default Index;
