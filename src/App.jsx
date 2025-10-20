@@ -21,16 +21,15 @@ import NotFoundPage from '@/views/404';
 // 导入认证提供者
 import { AuthProvider } from '@/context/auth-context';
 
-// 导入布局提供者
-import { LayoutProvider } from '@/context/layout-context/LayoutContext';
-
-// 导入布局组件
-import AppLayout from '@/components/AppLayout/AppLayout';
+// 导入布局渲染器
+import LayoutRenderer from '@/components/LayoutRenderer';
 
 // 导入认证相关
 import { useAuth } from '@/hooks/useAuth';
 import { authApi } from '@/api/auth';
 import { getToken, removeToken } from '@/utils/token';
+
+import { Spin } from 'antd';
 
 const RootLayout = () => {
   // 使用 useNavigate 钩子获取导航函数，并在副作用中赋值给 React.navigate
@@ -41,15 +40,9 @@ const RootLayout = () => {
     React.navigate = navigate;
   }, [navigate]);
 
-  // 使用 useRef 防止重复初始化
-  const isInitiated = useRef(false);
-
   // 初始化认证状态
   useEffect(() => {
     const initAuth = async () => {
-      if (isInitiated.current) return; // 如果已经初始化过，直接返回
-      isInitiated.current = true; // 设置为已初始化
-
       const token = getToken();
       if (token) {
         try {
@@ -72,32 +65,44 @@ const RootLayout = () => {
 
     initAuth();
 
-    // 返回清理函数（StrictMode 需要）
     return () => {
-      // 重置加载状态，避免状态不一致
       setIsLoading(false);
     };
   }, []); // 添加依赖项
 
   return (
-    <AppLayout>
+    <LayoutRenderer>
       {/* 使用 React.Suspense 包裹路由组件，实现懒加载 */}
       <React.Suspense
         fallback={
-          <div style={{ padding: '20px', textAlign: 'center' }}>加载中...</div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '100vh',
+              width: '100%',
+            }}
+          >
+            <Spin size="large" />
+          </div>
         }
       >
         {/* Outlet: 渲染当前路由的子路由组件 */}
         <Outlet />
       </React.Suspense>
-    </AppLayout>
+    </LayoutRenderer>
   );
 };
 
 // HydrateFallback 组件：用于 React Router v7 的初始水合过程
 // 在服务端渲染或部分水合场景中，当数据还未加载完成时显示
 // 对于纯客户端应用，使用空组件避免不必要的视觉闪烁
-const HydrateFallback = () => <></>;
+const HydrateFallback = () => {
+  console.log('HydrateFallback');
+
+  return <></>;
+};
 
 const App = () => {
   const router = createBrowserRouter([
@@ -121,9 +126,7 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <LayoutProvider>
-        <RouterProvider router={router} />
-      </LayoutProvider>
+      <RouterProvider router={router} />
     </AuthProvider>
   );
 };

@@ -9,9 +9,6 @@ import { getToken, removeToken } from './token.js';
 // 请求取消控制器映射
 const cancelTokenMap = new Map();
 
-// 请求去重映射 (GET 请求去重)
-const pendingRequests = new Map();
-
 // 全局登出锁，防止并发 401 多次触发登出
 let isLoggingOut = false;
 
@@ -107,16 +104,6 @@ request.interceptors.request.use(
       isLoggingOut = false;
     }
 
-    // 请求去重：只对 GET 请求进行去重
-    const requestKey = `${config.method?.toUpperCase()}:${config.url}`;
-    if (
-      config.method?.toUpperCase() === 'GET' &&
-      pendingRequests.has(requestKey)
-    ) {
-      console.log('🔄 GET请求重复，已取消:', requestKey);
-      return Promise.reject(new Error('GET请求重复，已取消'));
-    }
-
     // 生成请求 ID 用于取消请求（优化性能）
     const requestId = `${config.method?.toUpperCase()}:${config.url}:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
     config.requestId = requestId;
@@ -125,11 +112,6 @@ request.interceptors.request.use(
     const controller = new AbortController();
     config.signal = controller.signal;
     cancelTokenMap.set(requestId, controller);
-
-    // 只对 GET 请求进行去重存储
-    if (config.method?.toUpperCase() === 'GET') {
-      pendingRequests.set(requestKey, controller);
-    }
 
     return config;
   },
@@ -142,28 +124,19 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
-    // 清理取消控制器和去重映射
+    // 清理取消控制器
     if (response.config.requestId) {
       cancelTokenMap.delete(response.config.requestId);
-    }
-
-    // 只清理 GET 请求的去重映射
-    if (response.config.method?.toUpperCase() === 'GET') {
-      const requestKey = `${response.config.method?.toUpperCase()}:${response.config.url}`;
-      pendingRequests.delete(requestKey);
     }
 
     // 直接返回原始响应数据，保持后端数据格式
     return response.data;
   },
   (error) => {
-    // 清理取消控制器和去重映射
+    // 清理取消控制器
     if (error.config?.requestId) {
       cancelTokenMap.delete(error.config.requestId);
     }
-
-    const requestKey = `${error.config?.method?.toUpperCase()}:${error.config?.url}`;
-    pendingRequests.delete(requestKey);
 
     // 处理请求取消错误
     if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {

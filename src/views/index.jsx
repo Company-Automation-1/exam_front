@@ -2,6 +2,7 @@ import { Button } from 'antd';
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { removeToken } from '@/utils/token';
+import MyFooter from '@/components/MyFooter';
 
 const Index = () => {
   const { setUser } = useAuth();
@@ -32,6 +33,7 @@ const Index = () => {
       >
         About
       </Button>
+      <MyFooter />
     </>
   );
 };

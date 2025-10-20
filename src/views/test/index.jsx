@@ -2,12 +2,12 @@ import React from 'react';
 import { Button } from 'antd';
 import MyTabBar from '@/components/MyTabBar';
 
-const About = () => {
+const Test = () => {
   return (
     <>
       <div style={{ padding: '20px', minHeight: 'calc(100vh - 60px)' }}>
-        <h1>About 页面</h1>
-        <p>这是关于我们页面</p>
+        <h1>Test 页面</h1>
+        <p>这是测试页面</p>
         <Button
           type="primary"
           onClick={() => {
@@ -19,10 +19,10 @@ const About = () => {
         <Button
           type="default"
           onClick={() => {
-            React.navigate('/test');
+            React.navigate('/about');
           }}
         >
-          去测试页面
+          去关于页面
         </Button>
       </div>
       <MyTabBar />
@@ -30,4 +30,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default Test;

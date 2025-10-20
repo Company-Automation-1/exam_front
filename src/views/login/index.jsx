@@ -5,35 +5,7 @@ import { authApi } from '@/api/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { setToken } from '@/utils/token';
 import aLogo from '@/assets/react.svg';
-
-// Footer组件
-const Footer = () => {
-  return (
-    <>
-      <div
-        style={{
-          textAlign: 'center',
-          paddingTop: '24px',
-          paddingBottom: '5px',
-          color: '#666',
-          fontSize: '14px',
-        }}
-      >
-        Made with ❤ by
-      </div>
-      <div
-        style={{
-          textAlign: 'center',
-          paddingBottom: '24px',
-          color: '#666',
-          fontSize: '14px',
-        }}
-      >
-        ©2025
-      </div>
-    </>
-  );
-};
+import MyFooter from '@/components/MyFooter';
 
 // 登录页面样式
 const containerStyle = {
@@ -98,7 +70,7 @@ const Login = () => {
           });
           setToken(token);
           message.success('登录成功！');
-          React.navigate('/about', { replace: true });
+          React.navigate('/home', { replace: true });
         } else {
           setError(response.error?.message || '用户名或密码错误');
         }
@@ -133,161 +105,163 @@ const Login = () => {
   }, []);
 
   return (
-    <div style={containerStyle}>
-      <div style={formContainerStyle}>
-        <div style={loginFormStyle}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 24,
-            }}
-          >
-            <img
-              alt="logo"
-              src={aLogo}
-              style={{ height: 40, marginRight: 12 }}
-            />
-            <h2 style={{ margin: 0 }}>Test</h2>
-          </div>
-
-          <Tabs
-            activeKey={loginType}
-            onChange={setLoginType}
-            centered
-            items={[
-              {
-                key: 'account',
-                label: '登录',
-              },
-              {
-                key: 'mobile',
-                label: '注册',
-              },
-            ]}
-          />
-
-          {error && <LoginMessage content={error} />}
-
-          <Form
-            form={form}
-            name="login"
-            onFinish={handleSubmit}
-            autoComplete="off"
-            size="large"
-            initialValues={{ autoLogin: true }}
-          >
-            {loginType === 'account' && (
-              <>
-                <Form.Item
-                  name="username"
-                  rules={[{ required: true, message: '请输入用户名!' }]}
-                >
-                  <Input
-                    prefix={<UserOutlined />}
-                    placeholder="用户名: admin or user"
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="password"
-                  rules={[{ required: true, message: '请输入密码!' }]}
-                >
-                  <Input.Password
-                    prefix={<LockOutlined />}
-                    placeholder="密码: ant.design"
-                    size="large"
-                  />
-                </Form.Item>
-              </>
-            )}
-
-            {loginType === 'mobile' && (
-              <>
-                <Form.Item
-                  name="username"
-                  rules={[
-                    { required: true, message: '请输入用户名!' },
-                    { min: 3, message: '用户名至少3个字符!' },
-                    { max: 20, message: '用户名最多20个字符!' },
-                    {
-                      pattern: /^[a-zA-Z0-9_]+$/,
-                      message: '用户名只能包含字母、数字和下划线!',
-                    },
-                  ]}
-                >
-                  <Input
-                    prefix={<UserOutlined />}
-                    placeholder="请输入用户名"
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="password"
-                  rules={[
-                    { required: true, message: '请输入密码!' },
-                    { min: 6, message: '密码至少6个字符!' },
-                  ]}
-                >
-                  <Input.Password
-                    prefix={<LockOutlined />}
-                    placeholder="请输入密码"
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="confirmPassword"
-                  dependencies={['password']}
-                  rules={[
-                    { required: true, message: '请确认密码!' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        if (!value || getFieldValue('password') === value) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(
-                          new Error('两次输入的密码不一致!')
-                        );
-                      },
-                    }),
-                  ]}
-                >
-                  <Input.Password
-                    prefix={<LockOutlined />}
-                    placeholder="请再次输入密码"
-                    size="large"
-                  />
-                </Form.Item>
-              </>
-            )}
-
-            <div style={{ marginBottom: 24 }}>
-              <Form.Item name="autoLogin" valuePropName="checked" noStyle>
-                <Checkbox>自动登录</Checkbox>
-              </Form.Item>
-              <a style={{ float: 'right' }}>忘记密码</a>
+    <>
+      <div style={containerStyle}>
+        <div style={formContainerStyle}>
+          <div style={loginFormStyle}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 24,
+              }}
+            >
+              <img
+                alt="logo"
+                src={aLogo}
+                style={{ height: 40, marginRight: 12 }}
+              />
+              <h2 style={{ margin: 0 }}>Test</h2>
             </div>
 
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                style={{ width: '100%' }}
-                size="large"
-              >
-                {loginType === 'account' ? '登录' : '注册'}
-              </Button>
-            </Form.Item>
-          </Form>
+            <Tabs
+              activeKey={loginType}
+              onChange={setLoginType}
+              centered
+              items={[
+                {
+                  key: 'account',
+                  label: '登录',
+                },
+                {
+                  key: 'mobile',
+                  label: '注册',
+                },
+              ]}
+            />
+
+            {error && <LoginMessage content={error} />}
+
+            <Form
+              form={form}
+              name="login"
+              onFinish={handleSubmit}
+              autoComplete="off"
+              size="large"
+              initialValues={{ autoLogin: true }}
+            >
+              {loginType === 'account' && (
+                <>
+                  <Form.Item
+                    name="username"
+                    rules={[{ required: true, message: '请输入用户名!' }]}
+                  >
+                    <Input
+                      prefix={<UserOutlined />}
+                      placeholder="用户名: admin or user"
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="password"
+                    rules={[{ required: true, message: '请输入密码!' }]}
+                  >
+                    <Input.Password
+                      prefix={<LockOutlined />}
+                      placeholder="密码: ant.design"
+                      size="large"
+                    />
+                  </Form.Item>
+                </>
+              )}
+
+              {loginType === 'mobile' && (
+                <>
+                  <Form.Item
+                    name="username"
+                    rules={[
+                      { required: true, message: '请输入用户名!' },
+                      { min: 3, message: '用户名至少3个字符!' },
+                      { max: 20, message: '用户名最多20个字符!' },
+                      {
+                        pattern: /^[a-zA-Z0-9_]+$/,
+                        message: '用户名只能包含字母、数字和下划线!',
+                      },
+                    ]}
+                  >
+                    <Input
+                      prefix={<UserOutlined />}
+                      placeholder="请输入用户名"
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="password"
+                    rules={[
+                      { required: true, message: '请输入密码!' },
+                      { min: 6, message: '密码至少6个字符!' },
+                    ]}
+                  >
+                    <Input.Password
+                      prefix={<LockOutlined />}
+                      placeholder="请输入密码"
+                      size="large"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="confirmPassword"
+                    dependencies={['password']}
+                    rules={[
+                      { required: true, message: '请确认密码!' },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || getFieldValue('password') === value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(
+                            new Error('两次输入的密码不一致!')
+                          );
+                        },
+                      }),
+                    ]}
+                  >
+                    <Input.Password
+                      prefix={<LockOutlined />}
+                      placeholder="请再次输入密码"
+                      size="large"
+                    />
+                  </Form.Item>
+                </>
+              )}
+
+              <div style={{ marginBottom: 24 }}>
+                <Form.Item name="autoLogin" valuePropName="checked" noStyle>
+                  <Checkbox>自动登录</Checkbox>
+                </Form.Item>
+                <a style={{ float: 'right' }}>忘记密码</a>
+              </div>
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  style={{ width: '100%' }}
+                  size="large"
+                >
+                  {loginType === 'account' ? '登录' : '注册'}
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
         </div>
+        <MyFooter />
       </div>
-      <Footer />
-    </div>
+    </>
   );
 };
 

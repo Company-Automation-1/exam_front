@@ -8,7 +8,7 @@ const NotFoundPage = ({
   showBackButton = true,
 }) => {
   const handleGoHome = () => {
-    React.navigate('/');
+    React.navigate('/home');
   };
 
   const handleGoBack = () => {
