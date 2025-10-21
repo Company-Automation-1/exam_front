@@ -1,10 +1,6 @@
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import {
-  HomeOutlined,
-  InfoCircleOutlined,
-  ExperimentOutlined,
-} from '@ant-design/icons';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { HomeTwoTone, UserOutlined, SnippetsTwoTone } from '@ant-design/icons';
 import { Avatar, Segmented } from 'antd';
 
 const bottomStyle = {
@@ -15,46 +11,29 @@ const bottomStyle = {
   zIndex: 1000,
 };
 
+// 统一的路由配置 - 一个对象管理所有路由逻辑
+const ROUTE_CONFIG = {
+  '/home': 'home',
+  '/about': 'about',
+  '/exam': 'exam',
+};
+
 const MyTabBar = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // 根据当前路径确定激活的选项（使用useMemo缓存）
+  // 优化：简化逻辑，移除调试日志，提高性能
   const activeValue = useMemo(() => {
-    const path = location.pathname;
-    console.log('🔍 MyTabBar getActiveValue - path:', path);
-    console.log('🔍 MyTabBar getActiveValue - location:', location);
-
-    if (path === '/' || path === '/home') {
-      console.log('🔍 返回 home');
-      return 'home';
-    }
-    if (path === '/about') {
-      console.log('🔍 返回 about');
-      return 'about';
-    }
-    if (path === '/test') {
-      console.log('🔍 返回 test');
-      return 'test';
-    }
-    console.log('🔍 默认返回 home');
-    return 'home';
+    return ROUTE_CONFIG[location.pathname] || 'home';
   }, [location.pathname]);
 
-  // 处理选项切换
+  // 优化：使用反向查找，一个配置对象解决所有问题
   const handleChange = (value) => {
-    switch (value) {
-      case 'home':
-        React.navigate('/home');
-        break;
-      case 'about':
-        React.navigate('/about');
-        break;
-      case 'test':
-        React.navigate('/test');
-        break;
-      default:
-        React.navigate('/home');
-    }
+    // 通过反向查找找到对应的路径
+    const route =
+      Object.keys(ROUTE_CONFIG).find((path) => ROUTE_CONFIG[path] === value) ||
+      '/home';
+    navigate(route);
   };
 
   // 配置选项
@@ -62,7 +41,10 @@ const MyTabBar = ({ children }) => {
     {
       label: (
         <div style={{ padding: 4 }}>
-          <Avatar icon={<HomeOutlined />} />
+          <Avatar
+            style={{ background: 'transparent' }}
+            icon={<HomeTwoTone />}
+          />
           <div>首页</div>
         </div>
       ),
@@ -71,26 +53,33 @@ const MyTabBar = ({ children }) => {
     {
       label: (
         <div style={{ padding: 4 }}>
-          <Avatar icon={<InfoCircleOutlined />} />
-          <div>关于</div>
+          <Avatar
+            style={{ background: 'transparent' }}
+            icon={<SnippetsTwoTone />}
+          />
+          <div>试卷</div>
         </div>
       ),
-      value: 'about',
+      value: 'exam',
     },
     {
       label: (
         <div style={{ padding: 4 }}>
-          <Avatar icon={<ExperimentOutlined />} />
-          <div>测试</div>
+          <Avatar
+            style={{ background: 'transparent' }}
+            icon={<UserOutlined style={{ color: '#4096ff' }} />}
+          />
+          <div>关于</div>
         </div>
       ),
-      value: 'test',
+      value: 'about',
     },
   ];
 
   return (
     <>
       {children}
+      <div style={{ height: '60px' }}></div>
       <div style={bottomStyle}>
         <Segmented
           block={true}

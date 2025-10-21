@@ -6,12 +6,12 @@ import {
   sortLayoutsByPriority,
 } from '@/utils/layoutMatcher';
 import AppLayout from '@/components/AppLayout/AppLayout';
-// import MyTabBar from '@/components/MyTabBar';
+import MyTabBar from '@/components/MyTabBar';
 
 // 布局组件映射（静态导入）
 const layoutComponents = {
   AppLayout,
-  // MyTabBar,
+  MyTabBar,
 };
 
 const LayoutRenderer = ({ children }) => {

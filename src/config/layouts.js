@@ -9,11 +9,11 @@ export const layoutConfig = {
     component: 'AppLayout', // 组件名称
   },
 
-  // // MyTabBar 布局路径
-  // myTabBar: {
-  //   paths: ['/home', '/about', '/profile'],
-  //   component: 'MyTabBar', // 组件名称
-  // },
+  // MyTabBar 布局路径
+  myTabBar: {
+    paths: ['/home', '/about', '/exam'],
+    component: 'MyTabBar', // 组件名称
+  },
 };
 
 /**
@@ -44,5 +44,5 @@ export const layoutConfig = {
  */
 export const layoutPriority = {
   appLayout: 2, // 优先级高(内层)
-  // myTabBar: 1, // 优先级低(外层)
+  myTabBar: 1, // 优先级低(外层)
 };

@@ -1,8 +1,6 @@
-import { useEffect } from 'react';
 import { Button } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermission } from '@/hooks/usePermission';
-import MyTabBar from '@/components/MyTabBar';
 
 const Index = () => {
   const { user, isAuthenticated } = useAuth();
@@ -24,7 +22,6 @@ const Index = () => {
       <Button disabled={!canSuperAdmin}>仅限超管可用</Button>
       <Button disabled={!canAdmin}>管理员以上可用</Button>
       <Button disabled={!canUser}>用户以上可用</Button>
-      <MyTabBar />
     </>
   );
 };

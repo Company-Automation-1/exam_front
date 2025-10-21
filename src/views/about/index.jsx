@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from 'antd';
-import MyTabBar from '@/components/MyTabBar';
 
 const About = () => {
   return (
@@ -19,13 +18,12 @@ const About = () => {
         <Button
           type="default"
           onClick={() => {
-            React.navigate('/test');
+            React.navigate('/exam');
           }}
         >
-          去测试页面
+          去试卷页面
         </Button>
       </div>
-      <MyTabBar />
     </>
   );
 };
