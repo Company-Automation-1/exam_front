@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Card,
   List,
-  Avatar,
+  // Avatar,
   Tag,
   Button,
-  Space,
   Typography,
   Row,
   Col,
@@ -18,7 +17,7 @@ import {
 } from 'antd';
 import {
   ClockCircleOutlined,
-  UserOutlined,
+  // UserOutlined,
   TrophyOutlined,
   BookOutlined,
   PlayCircleOutlined,
@@ -51,7 +50,7 @@ const ExamList = () => {
 
     try {
       const response = await examApi.getExams({
-        page,
+        current: page,
         pageSize,
         status: 'published', // 只获取已发布的试卷
       });
@@ -300,7 +299,7 @@ const ExamList = () => {
                     ]}
                   >
                     <Card.Meta
-                      avatar={<Avatar icon={<UserOutlined />} size="large" />}
+                      // avatar={<Avatar icon={<UserOutlined />} size="large" />}
                       title={
                         <div
                           style={{
@@ -401,22 +400,6 @@ const ExamList = () => {
                             </Row>
                           )}
 
-                          {/* 考试标签 */}
-                          <div>
-                            <Space wrap>
-                              <Tag color="blue">分类ID: {exam.categoryId}</Tag>
-                              {exam.isRandomOrder && (
-                                <Tag color="purple">随机排序</Tag>
-                              )}
-                              {exam.allowRetake && (
-                                <Tag color="green">允许重考</Tag>
-                              )}
-                              {exam.allowReview && (
-                                <Tag color="orange">允许查看答案</Tag>
-                              )}
-                            </Space>
-                          </div>
-
                           {/* 时间信息 */}
                           <div
                             style={{
@@ -425,19 +408,25 @@ const ExamList = () => {
                               color: '#999',
                             }}
                           >
-                            {exam.startTime && (
-                              <Text type="secondary">
+                            <div
+                              style={{
+                                padding: '0 8px',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'flex-start',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <Text type="secondary" style={{ flex: 1 }}>
                                 <CalendarOutlined
                                   style={{ marginRight: '4px' }}
                                 />
-                                开始: {formatTime(exam.startTime)}
+                                开始: {formatTime(exam.startTime) || '无限制'}
                               </Text>
-                            )}
-                            {exam.endTime && (
-                              <Text type="secondary">
-                                结束: {formatTime(exam.endTime)}
+                              <Text type="secondary" style={{ flex: 1 }}>
+                                结束: {formatTime(exam.endTime) || '无限制'}
                               </Text>
-                            )}
+                            </div>
                           </div>
 
                           {/* 考试进度提示 */}

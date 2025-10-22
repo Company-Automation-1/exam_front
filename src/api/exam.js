@@ -7,7 +7,7 @@ export const examApi = {
   /**
    * 获取试卷列表
    * @param {Object} params - 查询参数
-   * @param {number} params.page - 页码
+   * @param {number} params.current - 页码
    * @param {number} params.pageSize - 每页数量
    * @param {string} params.status - 试卷状态
    * @param {number} params.categoryId - 分类ID
