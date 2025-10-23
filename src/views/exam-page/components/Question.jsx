@@ -1,7 +1,7 @@
 import { Checkbox, Space, Card, Typography, Input } from 'antd';
 const { TextArea } = Input;
 
-// 统一的客观题组件（单选和多选）
+// 选择题组件（统一处理单选和多选）
 export const QuestionChoice = ({
   options,
   value,
@@ -58,17 +58,9 @@ export const QuestionChoice = ({
   );
 };
 
-export const QuestionTextAnswer = ({ value, onChange }) => {
-  return (
-    <TextArea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="请输入答案（简答）"
-      autoSize={{ minRows: 3, maxRows: 8 }}
-    />
-  );
-};
+// 简答题组件（已移除，统一使用填空题）
 
+// 填空题组件
 export const QuestionFillBlank = ({ value, onChange }) => {
   return (
     <Input

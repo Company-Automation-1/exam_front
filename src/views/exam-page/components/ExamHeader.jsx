@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HeaderBar } from '@/components/HeaderBar';
 import { Typography, Progress, Space, Button, Tag } from 'antd';
 import { ClockCircleOutlined, ProfileOutlined } from '@ant-design/icons';
@@ -8,21 +8,86 @@ import { ClockCircleOutlined, ProfileOutlined } from '@ant-design/icons';
  * @param title 标题
  * @param progressText 进度文本
  * @param progressPercent 进度百分比
- * @param leftTimeText 剩余时间文本
+ * @param sessionData 会话数据
+ * @param examData 考试数据
  * @param isMobile 是否为移动端
  * @param onSubmit 提交回调
  * @param onBack 返回回调
+ * @param onTimeUp 时间到回调
  */
 const ExamHeader = ({
   title,
   progressText,
   progressPercent,
-  leftTimeText,
+  sessionData,
+  examData,
   isMobile,
   isPracticeMode = false,
   onSubmit,
   onBack,
+  onTimeUp,
 }) => {
+  console.log('🔄 ExamHeader 重新渲染');
+  const [leftSeconds, setLeftSeconds] = useState(null);
+  const prevLeftRef = useRef(null);
+  const countdownStartedRef = useRef(false);
+
+  // 倒计时逻辑
+  useEffect(() => {
+    if (!sessionData?.startTime || !examData?.timeLimit) {
+      setLeftSeconds(null);
+      return;
+    }
+
+    const start = new Date(sessionData.startTime).getTime();
+    const end = start + (examData.timeLimit || 0) * 60 * 1000;
+
+    const tick = () => {
+      const secs = Math.max(0, Math.floor((end - Date.now()) / 1000));
+      setLeftSeconds(secs);
+
+      if (!countdownStartedRef.current && secs !== null) {
+        countdownStartedRef.current = true;
+      }
+
+      prevLeftRef.current = secs;
+      console.log('⏰ 倒计时更新:', secs, '秒');
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [sessionData?.startTime, examData?.timeLimit]);
+
+  // 检测时间到0，触发自动交卷
+  useEffect(() => {
+    const prev = prevLeftRef.current;
+    const hasStarted = countdownStartedRef.current;
+
+    if (
+      hasStarted &&
+      examData?.timeLimit > 0 &&
+      typeof prev === 'number' &&
+      prev > 0 &&
+      leftSeconds === 0
+    ) {
+      if (onTimeUp) {
+        onTimeUp();
+      }
+    }
+  }, [leftSeconds, examData?.timeLimit, onTimeUp]);
+
+  const formatLeft = (secs) => {
+    if (secs == null) return '计算中...';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0)
+      return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  };
+
+  const leftTimeText = formatLeft(leftSeconds);
   return (
     <>
       <HeaderBar

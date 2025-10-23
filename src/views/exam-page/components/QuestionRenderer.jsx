@@ -1,36 +1,22 @@
 import React from 'react';
 import { Card, Typography, Space, Tag } from 'antd';
-import {
-  QuestionChoice,
-  QuestionFillBlank,
-  QuestionTextAnswer,
-} from './Question';
+import { QuestionChoice, QuestionFillBlank } from './Question';
 
 // 将后端题型 code 映射为内部渲染类型
 const mapBackendTypeToRenderType = (code) => {
   switch (code) {
-    case 'single_choice':
-    case 'true_false':
-      return 'single';
-    case 'multiple_choice':
-      return 'multiple';
-    case 'fill_blank':
-      return 'blank';
-    case 'short_answer':
-    case 'essay':
-      return 'text';
+    case 'choice':
+      return 'choice';
+    case 'fill_in':
+      return 'fill_in';
     default:
-      return code || 'single';
+      return code || 'choice';
   }
 };
 
 const typeTextMap = {
-  single_choice: '单选题',
-  true_false: '判断题',
-  multiple_choice: '多选题',
-  fill_blank: '填空题',
-  short_answer: '简答题',
-  essay: '论述题',
+  choice: '选择题',
+  fill_in: '填空题',
 };
 
 /**
@@ -43,10 +29,15 @@ const QuestionRenderer = ({
   value,
   onChange,
 }) => {
+  console.log('🔄 QuestionRenderer 重新渲染');
   if (!question) return null;
 
   // 适配后端字段：content -> stem；options 对象数组 -> 纯文案数组
-  const backendTypeCode = question.type || question.typeCode || question.code;
+  const backendTypeCode =
+    question.questionType ||
+    question.type ||
+    question.typeCode ||
+    question.code;
   const renderType = mapBackendTypeToRenderType(backendTypeCode);
   const stem = question.stem || question.content || '';
   const options = Array.isArray(question.options)
@@ -54,37 +45,46 @@ const QuestionRenderer = ({
     : [];
 
   let body = null;
-  if (renderType === 'single' || renderType === 'multiple') {
+  if (renderType === 'choice') {
+    // 根据后端返回的 isMultipleChoice 字段判断单选/多选
+    const isMultiple = question.isMultipleChoice || false;
     body = (
       <QuestionChoice
         options={options}
         value={value}
         onChange={onChange}
-        multiple={renderType === 'multiple'}
+        multiple={isMultiple}
       />
     );
-  } else if (renderType === 'blank') {
+  } else if (renderType === 'fill_in') {
     body = (
       <QuestionFillBlank
         value={typeof value === 'string' ? value : ''}
         onChange={onChange}
       />
     );
-  } else if (renderType === 'text') {
-    body = (
-      <QuestionTextAnswer
-        value={typeof value === 'string' ? value : ''}
-        onChange={onChange}
-      />
-    );
   }
 
-  // 文案优先使用后端code映射，否则回退到内部类型
-  const typeText =
-    typeTextMap[backendTypeCode] ||
-    { single: '单选题', multiple: '多选题', blank: '填空题', text: '简答题' }[
-      renderType
-    ];
+  // 根据题目类型和是否多选显示文案
+  let typeText = '';
+  if (renderType === 'choice') {
+    const isMultiple = question.isMultipleChoice || false;
+
+    // 智能识别判断题：只有2个选项且包含"正确"/"错误"
+    const isTrueFalse =
+      options.length === 2 &&
+      options.some((opt) => opt.content === '正确' || opt.content === '错误');
+
+    if (isTrueFalse) {
+      typeText = '判断题';
+    } else {
+      typeText = isMultiple ? '多选题' : '单选题';
+    }
+  } else if (renderType === 'fill_in') {
+    typeText = '填空题';
+  } else {
+    typeText = '题目';
+  }
 
   return (
     <Card>
