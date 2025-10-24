@@ -29,7 +29,7 @@ const QuestionRenderer = ({
   value,
   onChange,
 }) => {
-  console.log('🔄 QuestionRenderer 重新渲染');
+  // console.log('🔄 QuestionRenderer 重新渲染');
   if (!question) return null;
 
   // 适配后端字段：content -> stem；options 对象数组 -> 纯文案数组

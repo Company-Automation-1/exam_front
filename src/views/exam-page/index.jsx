@@ -6,10 +6,11 @@ import ExamHeader from './components/ExamHeader';
 import { ExamBottomBar } from './components/ExamBottomBar';
 import { QuestionRenderer } from './components/QuestionRenderer';
 import { AnswerSheetModal } from './components/AnswerSheetModal';
+import VideoRecorder from '@/utils/VideoRecorder';
 import styles from './index.module.css';
 
 const Index = () => {
-  console.log('🔄 主页面重新渲染');
+  // console.log('🔄 主页面重新渲染');
   const screens = Grid.useBreakpoint(); // 判断是否为移动端
   const isMobile = !screens.md;
 
@@ -27,6 +28,9 @@ const Index = () => {
   // 当前题目索引（0开始）
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+
+  // 视频录制器
+  const videoRecorder = useRef(new VideoRecorder());
 
   useEffect(() => {
     const fetchExamData = async () => {
@@ -74,6 +78,15 @@ const Index = () => {
             setAnswers(localAnswers);
           }
         }
+
+        // 4. 开始录制第一段视频
+        if (questionsData.length > 0 && sessionId) {
+          await videoRecorder.current.startFirstSegment(
+            sessionId,
+            questionsData[0].id,
+            0
+          );
+        }
       } catch (error) {
         console.error('获取考试数据失败:', error);
       } finally {
@@ -84,6 +97,13 @@ const Index = () => {
     if (sessionId && examId) {
       fetchExamData();
     }
+
+    // 组件卸载时停止录制
+    return () => {
+      if (videoRecorder.current) {
+        videoRecorder.current.stopRecording();
+      }
+    };
   }, [sessionId, examId]);
 
   // 清理调试：移除全量状态打印
@@ -138,12 +158,26 @@ const Index = () => {
   const totalQuestions = questions?.length ?? 0;
   const progressText = `${Math.min(currentIndex + 1, totalQuestions)}/${totalQuestions}`;
 
+  // 处理题目切换
+  const handleQuestionChange = async (newIndex) => {
+    if (newIndex < 0 || newIndex >= totalQuestions) return;
+
+    // 切换录制
+    await videoRecorder.current.switchSegment(questions[newIndex].id, newIndex);
+
+    setCurrentIndex(newIndex);
+  };
+
   // 交卷
   const submitExam = async () => {
     if (submitting) return;
     try {
       setSubmitting(true);
-      const timeSpent = (() => {
+
+      // 停止录制
+      await videoRecorder.current.stopRecording();
+
+      (() => {
         if (sessionData?.startTime) {
           return Math.max(
             0,
@@ -272,12 +306,12 @@ const Index = () => {
               isMobile={isMobile}
               disablePrev={currentIndex === 0}
               disableNext={questions?.length === 0}
-              onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+              onPrev={() => handleQuestionChange(currentIndex - 1)}
               onNext={() => {
                 if (currentIndex + 1 >= totalQuestions) {
                   confirmSubmit();
                 } else {
-                  setCurrentIndex((i) => Math.min(totalQuestions - 1, i + 1));
+                  handleQuestionChange(currentIndex + 1);
                 }
               }}
               isLast={currentIndex + 1 >= totalQuestions}
@@ -294,7 +328,7 @@ const Index = () => {
         answers={answers}
         highlightIndex={currentIndex}
         onGoto={(idx) => {
-          setCurrentIndex(idx);
+          handleQuestionChange(idx);
           setSheetOpen(false);
         }}
         onBrowseAll={() => {

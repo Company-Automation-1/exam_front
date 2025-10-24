@@ -149,9 +149,25 @@ const ExamList = () => {
     }
 
     try {
+      // 1. 先请求摄像头权限
+      message.loading('正在请求摄像头权限...', 0);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: 1280,
+          height: 720,
+          frameRate: 30,
+        },
+        audio: true,
+      });
+
+      // 权限获取成功，关闭测试流
+      stream.getTracks().forEach((track) => track.stop());
+
+      message.destroy();
       message.loading('正在创建考试会话...', 0);
 
-      // 获取用户信息
+      // 2. 获取用户信息
       const userAgent = navigator.userAgent;
       const deviceInfo = {
         platform: navigator.platform,
@@ -162,6 +178,7 @@ const ExamList = () => {
         },
       };
 
+      // 3. 创建考试会话
       const response = await examApi.startExam(exam.id, {
         userAgent,
         deviceInfo,
@@ -182,7 +199,20 @@ const ExamList = () => {
       message.destroy();
       console.error('开始考试失败:', error);
 
-      // 根据错误类型显示不同消息
+      // 判断是否为摄像头权限错误
+      if (
+        error.name === 'NotAllowedError' ||
+        error.name === 'PermissionDeniedError'
+      ) {
+        Modal.warning({
+          title: '需要摄像头权限',
+          content: '考试需要开启摄像头进行监控，请授权后重试。',
+          okText: '我知道了',
+        });
+        return;
+      }
+
+      // 其他错误
       if (error.response?.data?.message) {
         message.error(error.response.data.message);
       } else {

@@ -11,7 +11,7 @@ const ExamBottomBar = ({
   hidePrev = false,
   isLast = false, // 新增：是否为最后一题
 }) => {
-  console.log('🔄 ExamBottomBar 重新渲染');
+  // console.log('🔄 ExamBottomBar 重新渲染');
   return (
     <Row gutter={8} style={{ width: '100%', padding: '.9vh 0' }}>
       {!hidePrev && (

@@ -27,7 +27,7 @@ const ExamHeader = ({
   onBack,
   onTimeUp,
 }) => {
-  console.log('🔄 ExamHeader 重新渲染');
+  // console.log('🔄 ExamHeader 重新渲染');
   const [leftSeconds, setLeftSeconds] = useState(null);
   const prevLeftRef = useRef(null);
   const countdownStartedRef = useRef(false);
@@ -51,7 +51,7 @@ const ExamHeader = ({
       }
 
       prevLeftRef.current = secs;
-      console.log('⏰ 倒计时更新:', secs, '秒');
+      // console.log('⏰ 倒计时更新:', secs, '秒');
     };
 
     tick();
