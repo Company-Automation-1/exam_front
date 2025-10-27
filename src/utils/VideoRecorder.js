@@ -163,7 +163,7 @@ class VideoRecorder {
     try {
       console.log(`上传第${questionIndex + 1}题视频...`);
 
-      const response = await fetch('/api/monitoring/upload-segment', {
+      const response = await fetch('/api/monitoring/upload', {
         method: 'POST',
         body: formData,
       });

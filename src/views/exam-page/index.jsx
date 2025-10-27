@@ -17,7 +17,7 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session');
   const examId = searchParams.get('examId');
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
 
   // 考试数据状态存储
   const [examData, setExamData] = useState(null); // 试卷详情数据

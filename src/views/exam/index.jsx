@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Card,
   List,
@@ -32,6 +33,7 @@ import { examApi } from '@/api/exam';
 const { Title, Text, Paragraph } = Typography;
 
 const ExamList = () => {
+  const { user } = useAuth();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -179,7 +181,8 @@ const ExamList = () => {
       };
 
       // 3. 创建考试会话
-      const response = await examApi.startExam(exam.id, {
+      console.log(' 😶‍🌫️ user', user);
+      const response = await examApi.startExam(exam.id, +user.userid, {
         userAgent,
         deviceInfo,
       });

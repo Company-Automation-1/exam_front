@@ -45,18 +45,19 @@ export const examApi = {
   /**
    * 开始考试
    * @param {number} examId - 试卷ID
+   * @param {number} userId - 用户ID
    * @param {Object} options - 可选参数
    * @param {string} options.ipAddress - IP地址
    * @param {string} options.userAgent - 用户代理
    * @param {Object} options.deviceInfo - 设备信息
    * @returns {Promise<Object>} 考试会话信息
    */
-  async startExam(examId, options = {}) {
+  async startExam(examId, userId, options = {}) {
     return await request('/api/exam-sessions', {
       method: 'POST',
       data: {
         examId,
-        userId: 1, // 暂时硬编码，后续从认证获取
+        userId: +userId,
         ...options,
       },
     });

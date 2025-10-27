@@ -63,12 +63,10 @@ const Login = () => {
         });
 
         if (response.success) {
-          const { token, currentAuthority } = response.data;
-          setUser({
-            username: values.username,
-            access: currentAuthority,
-          });
+          const { token } = response.data;
           setToken(token);
+          const userResponse = await authApi.getProfile();
+          setUser(userResponse.data);
           message.success('登录成功！');
           React.navigate('/home', { replace: true });
         } else {

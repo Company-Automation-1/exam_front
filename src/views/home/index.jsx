@@ -5,6 +5,7 @@ import { usePermission } from '@/hooks/usePermission';
 const Index = () => {
   const { user, isAuthenticated } = useAuth();
   const { canSuperAdmin, canAdmin, canUser, userAccess } = usePermission();
+  console.log(' 😶‍🌫️ user', user);
 
   // useEffect(() => {
   //   console.log('🔍 权限状态:', {
