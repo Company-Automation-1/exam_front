@@ -1,30 +1,22 @@
-import { Button } from 'antd';
-import { useAuth } from '@/hooks/useAuth';
-import { usePermission } from '@/hooks/usePermission';
+import { Result } from 'antd';
 
-const Index = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { canSuperAdmin, canAdmin, canUser, userAccess } = usePermission();
-  console.log(' 😶‍🌫️ user', user);
-
-  // useEffect(() => {
-  //   console.log('🔍 权限状态:', {
-  //     canSuperAdmin,
-  //     canAdmin,
-  //     canUser,
-  //     userAccess,
-  //   });
-  //   console.log('🔍 用户信息:', { user, isAuthenticated });
-  // }, [canSuperAdmin, canAdmin, canUser, userAccess, user, isAuthenticated]);
-
+const Home = () => {
   return (
     <>
-      <h1>Home</h1>
-      <Button disabled={!canSuperAdmin}>仅限超管可用</Button>
-      <Button disabled={!canAdmin}>管理员以上可用</Button>
-      <Button disabled={!canUser}>用户以上可用</Button>
+      <>
+        <div
+          style={{
+            height: 'calc(100vh - 60px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Result status="404" title="首页" subTitle="待开发页面，敬请期待" />
+        </div>
+      </>
     </>
   );
 };
 
-export default Index;
+export default Home;

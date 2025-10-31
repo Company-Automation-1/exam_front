@@ -6,3 +6,5 @@
 !vite.config.js
 !eslint.config.js
 !vercel.json
+
+src/assets/*

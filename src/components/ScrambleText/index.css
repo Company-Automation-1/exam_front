@@ -1,0 +1,78 @@
+@font-face {
+  font-display: block;
+  font-family: Mori;
+  font-style: normal;
+  font-weight: 600;
+  src: url(https://assets.codepen.io/16327/PPMori-Regular.woff) format('woff');
+}
+
+.text-scramble__content {
+  max-width: 40ch;
+  font-size: max(2rem, min(5.69579vw + 0.665049rem, 3rem));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-top: max(2rem, min(2.0712vw + 1.51456rem, 4rem));
+  position: relative;
+  font-family: 'Space Mono', monospace;
+  text-align: center;
+  color: #dfdcff;
+  min-height: 1.1em; /* 确保有最小高度 */
+}
+
+.text-scramble__text {
+  position: relative; /* 改为相对定位，让内容自然撑开高度 */
+  display: block;
+}
+
+.text-scramble__text span {
+  word-break: break-word;
+}
+
+.text-scramble__text img {
+  display: inline-block;
+  height: 0.9em;
+  width: auto;
+}
+
+/* 自定义样式变体 */
+.text-scramble__content.light {
+  color: #333;
+  background: #fff;
+}
+
+.text-scramble__content.dark {
+  color: #dfdcff;
+  background: #0e100f;
+}
+
+.text-scramble__content.primary {
+  color: #1890ff;
+}
+
+.text-scramble__content.success {
+  color: #52c41a;
+}
+
+.text-scramble__content.warning {
+  color: #faad14;
+}
+
+.text-scramble__content.error {
+  color: #ff4d4f;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .text-scramble__content {
+    font-size: max(1.5rem, min(4vw + 0.5rem, 2.5rem));
+    margin-top: max(1rem, min(1.5vw + 0.8rem, 2rem));
+  }
+}
+
+@media (max-width: 480px) {
+  .text-scramble__content {
+    font-size: max(1.2rem, min(3.5vw + 0.3rem, 2rem));
+    margin-top: max(0.8rem, min(1.2vw + 0.5rem, 1.5rem));
+  }
+}

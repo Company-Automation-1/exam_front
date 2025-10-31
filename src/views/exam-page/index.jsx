@@ -8,11 +8,13 @@ import { QuestionRenderer } from './components/QuestionRenderer';
 import { AnswerSheetModal } from './components/AnswerSheetModal';
 import VideoRecorder from '@/utils/VideoRecorder';
 import styles from './index.module.css';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
   // console.log('🔄 主页面重新渲染');
   const screens = Grid.useBreakpoint(); // 判断是否为移动端
   const isMobile = !screens.md;
+  const { user } = useAuth();
 
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session');
@@ -61,11 +63,15 @@ const Index = () => {
 
         // 3. 获取已保存的答案
         if (sessionId) {
-          const answersResponse = await examApi.getUserAnswers(sessionId);
+          const answersResponse = await examApi.getUserAnswers(
+            sessionId,
+            1,
+            1000
+          );
           if (answersResponse.success) {
             // 恢复答案到本地状态
             const localAnswers = {};
-            answersResponse.data.forEach((answer) => {
+            answersResponse.data.items.forEach((answer) => {
               if (answer.answerOptions?.selectedOptions) {
                 // 选择题：使用 selectedOptions
                 localAnswers[answer.questionId] =
@@ -129,6 +135,7 @@ const Index = () => {
 
       const response = await examApi.saveAnswer(
         sessionId,
+        user.userid,
         questionId,
         content,
         answerOptions
@@ -195,7 +202,7 @@ const Index = () => {
       if (response.success) {
         const { summary } = response.data;
         message.success(
-          `考试完成！得分：${summary.userScore}/${summary.totalScore}，${summary.isPassed ? '通过' : '未通过'}`
+          `考试完成！用时：${summary.timeSpent}秒，答案已提交，等待评分`
         );
         window.location.href = '/exam';
       } else {

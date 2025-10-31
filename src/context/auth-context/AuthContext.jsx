@@ -9,20 +9,20 @@ export const AuthContext = createContext(undefined);
  */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user;
 
   const value = useMemo(
     () => ({
       // 状态
-      user,
-      isLoading,
-      isAuthenticated,
+      user, // 用户信息
+      isLoading, // 是否加载中
+      isAuthenticated, // 是否已认证
 
       // 状态更新方法
-      setUser,
-      setIsLoading,
+      setUser, // 设置用户信息
+      setIsLoading, // 设置是否加载中
     }),
     [user, isLoading, isAuthenticated]
   );

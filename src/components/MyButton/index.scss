@@ -1,0 +1,38 @@
+// Position Aware Button - 基于antd Button的样式增强
+.position-aware-btn {
+  background-color: transparent;
+  background: none;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.5s ease-in-out;
+  border: #1677ff dashed 1px;
+
+  &:hover {
+    // all: unset !important;
+    background-color: transparent;
+    background: none !important;
+  }
+  .position-aware-bg {
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background-color: #1677ff;
+    transition:
+      width 0.4s ease-in-out,
+      height 0.4s ease-in-out;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  &:hover {
+    color: #fff !important;
+
+    .position-aware-bg {
+      width: 300%;
+      height: 300%;
+    }
+  }
+}

@@ -29,12 +29,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { authApi } from '@/api/auth';
 import { getToken, removeToken } from '@/utils/token';
 
-import { Spin } from 'antd';
+import Loading from '@/components/Loading';
 
 const RootLayout = () => {
   // 使用 useNavigate 钩子获取导航函数，并在副作用中赋值给 React.navigate
   const navigate = useNavigate();
   const { setUser, setIsLoading } = useAuth();
+
+  const { user } = useAuth();
+
+  console.log(' 😶‍🌫️ user', user);
 
   useEffect(() => {
     React.navigate = navigate;
@@ -84,7 +88,7 @@ const RootLayout = () => {
               width: '100%',
             }}
           >
-            <Spin size="large" />
+            <Loading />
           </div>
         }
       >

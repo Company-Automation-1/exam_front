@@ -93,12 +93,13 @@ export const examApi = {
    * @param {Object} answerOptions - 答案选项（客观题）
    * @returns {Promise<Object>} 保存结果
    */
-  async saveAnswer(sessionId, questionId, content, answerOptions) {
+  async saveAnswer(sessionId, userId, questionId, content, answerOptions) {
     return await request('/api/user-answers', {
       method: 'POST',
       data: {
-        sessionId: parseInt(sessionId, 10),
-        questionId: parseInt(questionId, 10),
+        sessionId: +sessionId,
+        userId: +userId,
+        questionId: +questionId,
         content,
         answerOptions,
       },
@@ -108,12 +109,17 @@ export const examApi = {
   /**
    * 获取用户答案列表
    * @param {number} sessionId - 会话ID
+   * @param {number} current - 页码，默认1
+   * @param {number} pageSize - 每页数量，默认1000（获取所有答案）
    * @returns {Promise<Object>} 答案列表
    */
-  async getUserAnswers(sessionId) {
-    return await request(`/api/user-answers?sessionId=${sessionId}`, {
-      method: 'GET',
-    });
+  async getUserAnswers(sessionId, current = 1, pageSize = 1000) {
+    return await request(
+      `/api/user-answers?sessionId=${sessionId}&current=${current}&pageSize=${pageSize}`,
+      {
+        method: 'GET',
+      }
+    );
   },
 
   /**
